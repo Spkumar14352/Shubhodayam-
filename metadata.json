@@ -1,0 +1,8 @@
+{
+  "name": "Shubhodaya",
+  "description": "All-in-one daily Telugu Panchangam, Horoscope, Live TV, News, Radio and Cricket",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

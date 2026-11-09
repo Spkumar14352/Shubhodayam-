@@ -1,0 +1,11 @@
+{
+  "name": "Shubhodaya - Telugu Daily Panchang, News & TV",
+  "short_name": "Shubhodaya",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1A0A0F",
+  "theme_color": "#5B0E1E",
+  "orientation": "portrait-primary",
+  "description": "All-in-one daily app for Telugu and Indian users: Panchang, horoscope, live devotional/news TV, radio, news and cricket.",
+  "lang": "te"
+}
