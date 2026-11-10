@@ -9,7 +9,8 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.example.MainActivity
 import com.example.R
-import com.example.data.model.FestivalCalendarData
+import com.example.data.festivals.FestivalCalendar
+import com.example.data.model.City
 import com.example.data.model.Language
 import com.example.data.model.PanchangData
 import com.example.data.model.PanchangProvider
@@ -127,8 +128,8 @@ class LocalNotificationScheduler(private val context: Context) {
         notificationManager.notify(NOTIFICATION_RAHU_ID, notification)
     }
 
-    fun showUpcomingFestivalNotification(language: Language) {
-        val nextFestival = FestivalCalendarData.getNextFestival(LocalDate.now())
+    fun showUpcomingFestivalNotification(language: Language, city: City) {
+        val nextFestival = FestivalCalendar.nextMajor(context, LocalDate.now(), city.latitude, city.longitude) ?: return
         val isTelugu = language == Language.TELUGU
         val title = if (isTelugu) "రేపు విశేష పర్వదినం: ${nextFestival.nameTe}" else "Tomorrow's Festival: ${nextFestival.nameEn}"
         val text = if (isTelugu) {
@@ -162,7 +163,7 @@ class LocalNotificationScheduler(private val context: Context) {
         when (type) {
             "MORNING" -> showMorningPanchangNotification(panchang, prefs.language)
             "RAHU" -> showRahuKalamReminder(panchang, prefs.language)
-            "FESTIVAL" -> showUpcomingFestivalNotification(prefs.language)
+            "FESTIVAL" -> showUpcomingFestivalNotification(prefs.language, prefs.selectedCity)
         }
     }
 }

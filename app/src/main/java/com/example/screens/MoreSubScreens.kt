@@ -2,7 +2,9 @@ package com.example.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,8 +45,10 @@ import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SportsCricket
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -74,13 +78,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import com.example.AiPanditMessage
+import com.example.R
+import com.example.data.festivals.FestivalCalendar
+import java.time.LocalDate
 import com.example.data.model.City
 import com.example.data.model.CityData
 import com.example.data.model.Festival
@@ -1132,20 +1142,28 @@ fun AiPanditSubScreen(
 @Composable
 fun FestivalsSubScreen(
     language: Language,
+    selectedCity: City,
     onBack: () -> Unit
 ) {
     BackHandler { onBack() }
 
-    val nextFestival = remember {
-        com.example.data.model.FestivalCalendarData.getNextFestival()
+    val context = LocalContext.current
+    val today = remember { LocalDate.now() }
+    var showVrats by remember { mutableStateOf(false) }
+
+    // This year and next, calculated for the user's city.
+    val festivals = remember(selectedCity, today) {
+        listOf(today.year, today.year + 1).flatMap {
+            FestivalCalendar.forYear(context, it, selectedCity.latitude, selectedCity.longitude)
+        }
     }
-    val daysLeft = remember(nextFestival) {
-        nextFestival.getDaysLeft()
+    val nextFestival = remember(festivals) {
+        festivals.firstOrNull { it.isMajor && !it.date.isBefore(today) }
     }
 
     // Group festivals by month
-    val groupedFestivals = remember {
-        com.example.data.model.FestivalCalendarData.allFestivals.groupBy {
+    val groupedFestivals = remember(festivals, showVrats, language) {
+        festivals.filter { showVrats || it.isMajor }.groupBy {
             if (language == Language.TELUGU) it.monthGroupTe else it.monthGroupEn
         }
     }
@@ -1162,7 +1180,8 @@ fun FestivalsSubScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             // Hero Countdown Card for Next Festival
-            item {
+            if (nextFestival != null) item {
+                val daysLeft = nextFestival.getDaysLeft(today)
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1235,6 +1254,26 @@ fun FestivalsSubScreen(
                 }
             }
 
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = Translations.tr("festival_show_vrats", language),
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = showVrats,
+                        onCheckedChange = { showVrats = it },
+                        colors = SwitchDefaults.colors(checkedThumbColor = TempleGold, checkedTrackColor = TempleMaroon),
+                        modifier = Modifier.testTag("festival_show_vrats")
+                    )
+                }
+            }
+
             // Month grouped list
             groupedFestivals.forEach { (monthLabel, festivalsInMonth) ->
                 item {
@@ -1294,6 +1333,32 @@ fun FestivalsSubScreen(
                                 fontWeight = FontWeight.SemiBold
                             )
 
+                            if (festival.isVerified) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = AuspiciousGreen.copy(alpha = 0.15f),
+                                    modifier = Modifier.testTag("festival_verified_${festival.id}")
+                                ) {
+                                    Text(
+                                        text = "✓ ${Translations.tr("festival_verified", language)}",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = AuspiciousGreen,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+
+                            val note = if (language == Language.TELUGU) festival.noteTe else festival.noteEn
+                            if (note.isNotBlank()) {
+                                Text(
+                                    text = note,
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
                             Spacer(modifier = Modifier.height(6.dp))
 
                             Text(
@@ -1322,6 +1387,44 @@ fun FestivalsSubScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+/** One step of the "add widget" guide: a small phone drawing beside the step's text. */
+@Composable
+private fun WidgetHowToStep(
+    number: Int,
+    title: String,
+    description: String,
+    illustration: @Composable () -> Unit
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(width = 54.dp, height = 84.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .border(2.dp, TempleGold.copy(alpha = 0.7f), RoundedCornerShape(10.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            illustration()
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "$number. $title",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = description,
+                fontSize = 12.sp,
+                lineHeight = 17.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -1356,6 +1459,7 @@ fun SettingsSubScreen(
     var showPrivacyDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showWidgetDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -1775,6 +1879,43 @@ fun SettingsSubScreen(
                 }
             }
 
+            // Add Home-Screen Widget Instructions
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .clickable { showWidgetDialog = true }
+                        .testTag("setting_add_widget_btn"),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Widgets, contentDescription = null, tint = TempleSaffron)
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = Translations.tr("setting_add_widget", language),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
+
             // Privacy Policy Link
             item {
                 Card(
@@ -1943,6 +2084,78 @@ fun SettingsSubScreen(
             confirmButton = {
                 TextButton(onClick = { showRasiDialog = false }) {
                     Text(Translations.tr("close", language), color = TempleGold)
+                }
+            }
+        )
+    }
+
+    // Add Widget Steps Dialog
+    if (showWidgetDialog) {
+        AlertDialog(
+            onDismissRequest = { showWidgetDialog = false },
+            title = {
+                Text(
+                    text = Translations.tr("setting_add_widget", language),
+                    fontWeight = FontWeight.Bold,
+                    color = TempleGold
+                )
+            },
+            text = {
+                LazyColumn(
+                    modifier = Modifier
+                        .heightIn(max = 380.dp)
+                        .testTag("add_widget_steps"),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    item {
+                        WidgetHowToStep(
+                            number = 1,
+                            title = Translations.tr("widget_step1_title", language),
+                            description = Translations.tr("widget_step1_desc", language)
+                        ) {
+                            Icon(
+                                Icons.Default.TouchApp,
+                                contentDescription = null,
+                                tint = TempleSaffron,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+                    item {
+                        WidgetHowToStep(
+                            number = 2,
+                            title = Translations.tr("widget_step2_title", language),
+                            description = Translations.tr("widget_step2_desc", language)
+                        ) {
+                            Icon(
+                                Icons.Default.Widgets,
+                                contentDescription = null,
+                                tint = TempleGold,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+                    item {
+                        WidgetHowToStep(
+                            number = 3,
+                            title = Translations.tr("widget_step3_title", language),
+                            description = Translations.tr("widget_step3_desc", language)
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.shubhodaya_icon),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(34.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showWidgetDialog = false }) {
+                    Text(Translations.tr("close", language), color = TempleGold, fontWeight = FontWeight.Bold)
                 }
             }
         )

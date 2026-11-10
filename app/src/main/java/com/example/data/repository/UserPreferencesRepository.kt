@@ -7,6 +7,7 @@ import com.example.data.model.CityData
 import com.example.data.model.Language
 import com.example.data.model.Rasi
 import com.example.data.model.RasiData
+import com.example.data.model.ShortlistedName
 import com.example.data.model.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +28,8 @@ data class UserPreferences(
     val favoriteChannelIds: Set<String> = emptySet(),
     val cardsShared: Int = 0,
     val lastGreetingName: String = "",
-    val savedCreations: List<com.example.data.model.SavedGreeting> = emptyList()
+    val savedCreations: List<com.example.data.model.SavedGreeting> = emptyList(),
+    val babyNameShortlist: List<ShortlistedName> = emptyList()
 )
 
 class UserPreferencesRepository(context: Context) {
@@ -81,8 +83,52 @@ class UserPreferencesRepository(context: Context) {
             favoriteChannelIds = favorites,
             cardsShared = cardsShared,
             lastGreetingName = lastGreetingName,
-            savedCreations = savedCreations
+            savedCreations = savedCreations,
+            babyNameShortlist = loadBabyNameShortlist()
         )
+    }
+
+    private fun loadBabyNameShortlist(): List<ShortlistedName> {
+        val raw = prefs.getString("baby_name_shortlist_json", "[]") ?: "[]"
+        return try {
+            val array = org.json.JSONArray(raw)
+            (0 until array.length()).map { i ->
+                val obj = array.getJSONObject(i)
+                ShortlistedName(
+                    name = obj.getString("name"),
+                    telugu = obj.getString("telugu"),
+                    meaningEn = obj.optString("meaningEn"),
+                    meaningTe = obj.optString("meaningTe"),
+                    isAiSuggested = obj.optBoolean("isAiSuggested")
+                )
+            }
+        } catch (e: org.json.JSONException) {
+            emptyList()
+        }
+    }
+
+    fun toggleBabyNameShortlist(item: ShortlistedName) {
+        val current = _userPreferences.value.babyNameShortlist
+        val isSaved = current.any { it.name.equals(item.name, ignoreCase = true) }
+        val updated = if (isSaved) {
+            current.filterNot { it.name.equals(item.name, ignoreCase = true) }
+        } else {
+            current + item
+        }
+
+        val array = org.json.JSONArray()
+        updated.forEach {
+            array.put(
+                org.json.JSONObject()
+                    .put("name", it.name)
+                    .put("telugu", it.telugu)
+                    .put("meaningEn", it.meaningEn)
+                    .put("meaningTe", it.meaningTe)
+                    .put("isAiSuggested", it.isAiSuggested)
+            )
+        }
+        prefs.edit().putString("baby_name_shortlist_json", array.toString()).apply()
+        _userPreferences.value = _userPreferences.value.copy(babyNameShortlist = updated)
     }
 
     private fun loadSavedCreations(): List<com.example.data.model.SavedGreeting> {

@@ -16,7 +16,8 @@ import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import com.example.data.model.AppConfig
 import com.example.data.model.DailyQuotesData
-import com.example.data.model.FestivalCalendarData
+import com.example.data.festivals.FestivalCalendar
+import com.example.data.model.CityData
 import com.example.data.model.Language
 import com.example.data.model.PanchangData
 import java.io.File
@@ -139,7 +140,12 @@ object PanchangShareCardGenerator {
 
         // 5. Festival Banner (if applicable for targetDate)
         var contentStartY = 205f
-        val festivalMatch = FestivalCalendarData.allFestivals.find { it.date == targetDate }
+        val festivalMatch = FestivalCalendar.on(
+            context,
+            targetDate,
+            panchang.rawCalculation?.cityLatitude ?: CityData.defaultCity.latitude,
+            panchang.rawCalculation?.cityLongitude ?: CityData.defaultCity.longitude
+        ).firstOrNull()
         if (festivalMatch != null) {
             val festRect = RectF(65f, contentStartY, CARD_WIDTH - 65f, contentStartY + 95f)
             val festBgPaint = Paint().apply {

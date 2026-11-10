@@ -1,6 +1,9 @@
 package com.example
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -39,9 +42,28 @@ import com.example.ui.theme.ShubhodayaTheme
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.refreshWidgetData()
+        viewModel.refreshEclipses()
+    }
+
+    // Eclipse reminders need the notification permission on Android 13 and later.
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        if (!viewModel.uiState.value.userPreferences.notificationsEnabled) return
+        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) return
+        requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), NOTIFICATION_PERMISSION_REQUEST)
+    }
+
+    private companion object {
+        const val NOTIFICATION_PERMISSION_REQUEST = 41
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        requestNotificationPermissionIfNeeded()
 
         setContent {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -146,7 +168,8 @@ class MainActivity : ComponentActivity() {
                                             },
                                             onSharePanchang = {
                                                 viewModel.openSharePanchang(uiState.panchangDate)
-                                            }
+                                            },
+                                            eclipses = uiState.eclipses.orEmpty()
                                         )
 
                                         TabItem.PANCHANG -> PanchangScreen(
@@ -162,6 +185,8 @@ class MainActivity : ComponentActivity() {
                                             language = uiState.userPreferences.language,
                                             selectedChannel = uiState.selectedChannel,
                                             selectedCategory = uiState.selectedLiveCategory,
+                                            liveStatus = uiState.liveStatus,
+                                            onScreenOpened = { viewModel.loadLiveStatus() },
                                             favoriteChannelIds = uiState.userPreferences.favoriteChannelIds,
                                             onSelectCategory = { cat -> viewModel.selectLiveCategory(cat) },
                                             onSelectChannel = { channel -> viewModel.selectLiveChannel(channel) },
@@ -232,7 +257,11 @@ class MainActivity : ComponentActivity() {
                                             onSaveGreetingName = { viewModel.saveGreetingName(it) },
                                             onSaveCreation = { viewModel.addSavedCreation(it) },
                                             onDeleteCreation = { viewModel.deleteSavedCreation(it) },
-                                            onShowMessage = { viewModel.showMessage(it) }
+                                            onShowMessage = { viewModel.showMessage(it) },
+                                            babyNameShortlist = uiState.userPreferences.babyNameShortlist,
+                                            onToggleBabyNameShortlist = { viewModel.toggleBabyNameShortlist(it) },
+                                            onBabyNamesCardShared = { viewModel.onCardShared() },
+                                            eclipses = uiState.eclipses
                                         )
                                     }
 

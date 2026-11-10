@@ -27,6 +27,10 @@ enum class MoreDestination {
     AI_PANDIT,
     FESTIVALS,
     GREETINGS,
+    BABY_NAMES,
+    GRAHANAM,
+    MUHURTHAMS,
+    SHUBHALEKHA,
     SETTINGS,
     PREMIUM
 }

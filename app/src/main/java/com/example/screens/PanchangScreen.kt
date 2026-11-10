@@ -559,7 +559,7 @@ private fun SamvatsaramHeaderCard(
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
-                text = "${if (language == Language.TELUGU) panchang.ayanamTe else panchang.ayanamEn} • ${if (language == Language.TELUGU) panchang.rutuvuTe else panchang.rutuvuEn} • ${if (language == Language.TELUGU) panchang.maasamTe else panchang.maasamEn}",
+                text = "${if (language == Language.TELUGU) panchang.ayanamTe else panchang.ayanamEn} • ${if (language == Language.TELUGU) panchang.rutuvuTe else panchang.rutuvuEn} • ${if (language == Language.TELUGU) "${panchang.maasamTe}, ${panchang.pakshamTe}" else "${panchang.maasamEn}, ${panchang.pakshamEn}"}",
                 color = Color.White.copy(alpha = 0.9f),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium

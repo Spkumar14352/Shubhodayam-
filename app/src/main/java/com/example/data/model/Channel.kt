@@ -37,7 +37,7 @@ object ChannelsData {
             name = "Bhakthi TV",
             nameTelugu = "భక్తి టీవీ",
             category = "Devotional",
-            youtubeChannelId = "", // TODO: add official YouTube channel ID for Bhakthi TV
+            youtubeChannelId = "UCSzOZ97LOpU-_AVlGfmD4rQ",
             logoUrl = ""
         ),
         Channel(
@@ -45,7 +45,7 @@ object ChannelsData {
             name = "SVBC TTD Live",
             nameTelugu = "ఎస్వీబీసీ (తిరుమల లైవ్)",
             category = "Devotional",
-            youtubeChannelId = "", // TODO: add official YouTube channel ID for SVBC TTD
+            youtubeChannelId = "UCS2Y83GD-fc7qqgNW5uj41g",
             logoUrl = ""
         ),
         Channel(
@@ -71,7 +71,7 @@ object ChannelsData {
             name = "TV9 Telugu",
             nameTelugu = "టీవీ9 తెలుగు",
             category = "Telugu News",
-            youtubeChannelId = "", // TODO: add official YouTube channel ID for TV9 Telugu
+            youtubeChannelId = "UCPXTXMecYqnRKNdqdVOGSFg",
             logoUrl = ""
         ),
         Channel(
@@ -79,7 +79,7 @@ object ChannelsData {
             name = "NTV Telugu",
             nameTelugu = "ఎన్‌టీవీ తెలుగు",
             category = "Telugu News",
-            youtubeChannelId = "", // TODO: add official YouTube channel ID for NTV Telugu
+            youtubeChannelId = "UCumtYpCY26F6Jr3satUgMvA",
             logoUrl = ""
         ),
         Channel(
@@ -87,7 +87,7 @@ object ChannelsData {
             name = "ABN Andhra Jyothi",
             nameTelugu = "ఏబీఎన్ ఆంధ్రజ్యోతి",
             category = "Telugu News",
-            youtubeChannelId = "", // TODO: add official YouTube channel ID for ABN Andhra Jyothi
+            youtubeChannelId = "UC_2irx_BQR7RsBKmUV9fePQ",
             logoUrl = ""
         ),
         Channel(
@@ -95,7 +95,7 @@ object ChannelsData {
             name = "V6 News",
             nameTelugu = "వి6 న్యూస్",
             category = "Telugu News",
-            youtubeChannelId = "", // TODO: add official YouTube channel ID for V6 News
+            youtubeChannelId = "UCDCMjD1XIAsCZsYHNMGVcog",
             logoUrl = ""
         ),
         Channel(
@@ -103,7 +103,7 @@ object ChannelsData {
             name = "Sakshi TV",
             nameTelugu = "సాక్షి టీవీ",
             category = "Telugu News",
-            youtubeChannelId = "", // TODO: add official YouTube channel ID for Sakshi TV
+            youtubeChannelId = "UCQ_FATLW83q-4xJ2fsi8qAw",
             logoUrl = ""
         ),
 
@@ -113,7 +113,7 @@ object ChannelsData {
             name = "DD India Live",
             nameTelugu = "డీడీ ఇండియా",
             category = "National News",
-            youtubeChannelId = "", // TODO: add official YouTube channel ID for DD India
+            youtubeChannelId = "UCGDQNvybfDDeGTf4GtigXaw",
             logoUrl = ""
         ),
         Channel(
@@ -121,7 +121,7 @@ object ChannelsData {
             name = "Sansad TV",
             nameTelugu = "సంసద్ టీవీ",
             category = "National News",
-            youtubeChannelId = "", // TODO: add official YouTube channel ID for Sansad TV
+            youtubeChannelId = "UCISgnSNwqQ2i8lhCun3KtQg",
             logoUrl = ""
         ),
         Channel(
@@ -129,7 +129,7 @@ object ChannelsData {
             name = "NDTV India",
             nameTelugu = "ఎన్డీటీవీ ఇండియా",
             category = "National News",
-            youtubeChannelId = "", // TODO: add official YouTube channel ID for NDTV
+            youtubeChannelId = "UC9CYT9gSNLevX5ey2_6CK0Q",
             logoUrl = ""
         ),
 
@@ -139,7 +139,7 @@ object ChannelsData {
             name = "ETV Cinema",
             nameTelugu = "ఈటీవీ సినిమా",
             category = "Entertainment",
-            youtubeChannelId = "", // TODO: add official YouTube channel ID for ETV Cinema
+            youtubeChannelId = "UC3Dvbf4eEov7YORy5nEioTA",
             logoUrl = ""
         ),
         Channel(

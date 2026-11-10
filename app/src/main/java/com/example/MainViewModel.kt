@@ -24,12 +24,22 @@ import com.example.data.repository.UserPreferences
 import com.example.data.repository.UserPreferencesRepository
 import com.example.services.RadioPlayerManager
 import com.example.services.RadioPlayerState
+import com.example.widget.WidgetUpdater
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class AiPanditMessage(
     val id: String = java.util.UUID.randomUUID().toString(),
@@ -47,6 +57,9 @@ data class MainUiState(
     val panchangData: PanchangData = PanchangProvider.getPanchangForDate(LocalDate.now(), CityData.defaultCity),
     val selectedChannel: Channel = ChannelsData.allChannels.first(),
     val selectedLiveCategory: String = "ALL", // "FAVORITES", "ALL", "Devotional", "Telugu News", "National News", "Entertainment"
+    val liveStatus: com.example.data.repository.LiveStatusState = com.example.data.repository.LiveStatusState.Loading,
+    /** Null until the first calculation finishes. */
+    val eclipses: List<com.example.data.eclipses.Eclipse>? = null,
     val radioPlayerState: RadioPlayerState = RadioPlayerState(),
     val selectedRadioCategory: String = "TELUGU", // "TELUGU", "DEVOTIONAL", "NATIONAL"
     val radioStations: List<RadioBrowserStation> = emptyList(),
@@ -72,6 +85,7 @@ data class MainUiState(
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = UserPreferencesRepository(application)
     private val radioRepository = RadioRepository()
+    private val liveStatusRepository = com.example.data.repository.LiveStatusRepository()
     private val radioPlayerManager = RadioPlayerManager(application)
     private val newsRepository = com.example.data.repository.NewsRepository(application)
     private val cricketRepository = com.example.data.repository.CricketRepository(application)
@@ -80,7 +94,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
+    private val widgetRefreshRequests = MutableStateFlow(0)
+    private val eclipseRefreshRequests = MutableStateFlow(0)
+
     init {
+        observeWidgetData()
+        observeEclipses()
+
         // Collect user preferences
         viewModelScope.launch {
             repository.userPreferences.collect { prefs ->
@@ -107,6 +127,62 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         loadCricketMatches(forceRefresh = false)
 
         initializeAiPandit()
+    }
+
+    /** Re-saves the widget's Panchang; called each time the app comes to the foreground. */
+    fun refreshWidgetData() {
+        widgetRefreshRequests.update { it + 1 }
+    }
+
+    private fun observeWidgetData() {
+        // Saves on launch, on every refresh request, and when the language or city changes.
+        viewModelScope.launch {
+            combine(
+                repository.userPreferences.map { it.language to it.selectedCity }.distinctUntilChanged(),
+                widgetRefreshRequests
+            ) { selection, _ -> selection }
+                .collectLatest { (language, city) ->
+                    withContext(Dispatchers.Default) {
+                        WidgetUpdater.saveAndRefresh(getApplication<Application>(), language, city)
+                    }
+                }
+        }
+
+        viewModelScope.launch {
+            while (true) {
+                val now = LocalDateTime.now()
+                val nextMidnight = now.toLocalDate().plusDays(1).atStartOfDay()
+                delay(Duration.between(now, nextMidnight).toMillis() + 1_000)
+                refreshWidgetData()
+            }
+        }
+    }
+
+    /** Recalculates eclipses and resets their reminders; called each time the app comes to the foreground. */
+    fun refreshEclipses() {
+        eclipseRefreshRequests.update { it + 1 }
+    }
+
+    private fun observeEclipses() {
+        viewModelScope.launch {
+            combine(
+                repository.userPreferences
+                    .map { Triple(it.selectedCity, it.language, it.notificationsEnabled) }
+                    .distinctUntilChanged(),
+                eclipseRefreshRequests
+            ) { settings, _ -> settings }
+                .collectLatest { (city, language, notificationsEnabled) ->
+                    val eclipses = withContext(Dispatchers.Default) {
+                        com.example.data.eclipses.EclipseCalculator.upcoming(
+                            java.time.Instant.now(), city.latitude, city.longitude
+                        )
+                    }
+                    _uiState.value = _uiState.value.copy(eclipses = eclipses)
+                    com.example.services.EclipseReminders.schedule(
+                        getApplication<Application>(), eclipses, language, notificationsEnabled
+                    )
+                }
+        }
     }
 
     private fun initializeAiPandit() {
@@ -208,6 +284,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // --- Live TV Methods ---
+    fun loadLiveStatus() {
+        viewModelScope.launch {
+            val result = liveStatusRepository.fetch()
+            _uiState.value = _uiState.value.copy(liveStatus = result)
+        }
+    }
+
     fun selectLiveCategory(category: String) {
         _uiState.value = _uiState.value.copy(selectedLiveCategory = category)
     }
@@ -382,6 +465,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteSavedCreation(id: String) {
         repository.deleteSavedCreation(id)
+    }
+
+    fun toggleBabyNameShortlist(item: com.example.data.model.ShortlistedName) {
+        repository.toggleBabyNameShortlist(item)
     }
 
     fun askAiPandit(question: String) {

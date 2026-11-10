@@ -288,7 +288,12 @@ fun PanchangSharePreviewBottomSheet(
     }
 }
 
-private fun shareCardViaWhatsApp(context: Context, bitmap: Bitmap) {
+fun shareCardViaWhatsApp(
+    context: Context,
+    bitmap: Bitmap,
+    shareText: String = "శుభోదయం! నేటి పంచాంగం • Today's Panchang – Shubhodaya app: ${AppConfig.PLAY_STORE_URL}",
+    chooserTitle: String = "Share Panchang Card"
+) {
     try {
         val file = PanchangShareCardGenerator.saveBitmapToCache(context, bitmap)
         val uri = FileProvider.getUriForFile(
@@ -296,8 +301,6 @@ private fun shareCardViaWhatsApp(context: Context, bitmap: Bitmap) {
             "${context.packageName}.fileprovider",
             file
         )
-
-        val shareText = "శుభోదయం! నేటి పంచాంగం • Today's Panchang – Shubhodaya app: ${AppConfig.PLAY_STORE_URL}"
 
         // Try direct WhatsApp first
         val whatsappIntent = Intent(Intent.ACTION_SEND).apply {
@@ -319,7 +322,7 @@ private fun shareCardViaWhatsApp(context: Context, bitmap: Bitmap) {
                     putExtra(Intent.EXTRA_TEXT, shareText)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 },
-                "Share Panchang Card"
+                chooserTitle
             )
             context.startActivity(chooser)
         }

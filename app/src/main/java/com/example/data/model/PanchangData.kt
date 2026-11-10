@@ -1,6 +1,7 @@
 package com.example.data.model
 
 import com.example.data.AstronomyEngine
+import com.example.data.LunarCalendar
 import com.example.data.RealPanchangCalculation
 import java.time.LocalDate
 
@@ -55,6 +56,7 @@ object PanchangProvider {
             lat = city.latitude,
             lon = city.longitude
         )
+        val lunar = LunarCalendar.getLunarMonth(date, city.latitude, city.longitude)
 
         return PanchangData(
             date = date,
@@ -64,8 +66,8 @@ object PanchangProvider {
             ayanamEn = calc.ayanamEn,
             rutuvuTe = calc.rutuvuTe,
             rutuvuEn = calc.rutuvuEn,
-            maasamTe = calc.maasamTe,
-            maasamEn = calc.maasamEn,
+            maasamTe = "${lunar.month.nameTe} మాసం",
+            maasamEn = "${lunar.month.nameEn} Maasam",
             pakshamTe = calc.pakshaTe,
             pakshamEn = calc.pakshaEn,
             tithiNumber = calc.tithiNumber,

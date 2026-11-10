@@ -80,6 +80,39 @@ secrets {
 
 googleServices { missingGoogleServicesStrategy = MissingGoogleServicesStrategy.WARN }
 
+// The festival and muhurtham files in /data are edited by hand; copy them into the app's assets on every build.
+abstract class CopyFestivalData : DefaultTask() {
+  @get:InputFiles abstract val sources: ConfigurableFileCollection
+  @get:OutputDirectory abstract val outputDir: DirectoryProperty
+
+  @TaskAction
+  fun copy() {
+    val target = outputDir.get().asFile.resolve("app_data")
+    target.deleteRecursively()
+    target.mkdirs()
+    sources.forEach { it.copyTo(target.resolve(it.name)) }
+  }
+}
+
+val copyFestivalData = tasks.register<CopyFestivalData>("copyFestivalData") {
+  sources.from(
+    rootProject.files(
+      "data/festivalRules.ts",
+      "data/fixedFestivals.ts",
+      "data/festivalOverrides.ts",
+      "data/muhurthaRules.ts",
+      "data/muhurthams.ts",
+      "data/invitationTemplates.ts"
+    )
+  )
+}
+
+androidComponents {
+  onVariants { variant ->
+    variant.sources.assets?.addGeneratedSourceDirectory(copyFestivalData, CopyFestivalData::outputDir)
+  }
+}
+
 // Some unused dependencies are commented out below instead of being removed.
 // This makes it easy to add them back in the future if needed.
 dependencies {
@@ -126,6 +159,8 @@ dependencies {
   implementation(libs.okhttp)
   // implementation(libs.play.services.location)
   implementation(libs.retrofit)
+  implementation(libs.astronomy)
+  implementation(libs.zxing.core)
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)
   testImplementation(libs.androidx.junit)

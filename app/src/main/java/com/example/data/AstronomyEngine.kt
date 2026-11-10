@@ -54,6 +54,7 @@ data class RealPanchangCalculation(
     val tithiEn: String,
     val tithiEndTimeStrTe: String,
     val tithiEndTimeStrEn: String,
+    val tithiEndDateTime: LocalDateTime,
     val pakshaTe: String,
     val pakshaEn: String,
     val nakshatraNumber: Int,
@@ -61,6 +62,7 @@ data class RealPanchangCalculation(
     val nakshatraEn: String,
     val nakshatraEndTimeStrTe: String,
     val nakshatraEndTimeStrEn: String,
+    val nakshatraEndDateTime: LocalDateTime,
     val yogaNumber: Int,
     val yogaTe: String,
     val yogaEn: String,
@@ -339,8 +341,8 @@ object AstronomyEngine {
         val karanaIdx = getKaranaIndex(positionsAtSunrise.siderealMoon, positionsAtSunrise.siderealSun)
 
         // Tithi and Nakshatra end times
-        val (_, tithiEndStr) = findTithiEndTime(date, tithiNum, sunriseDateTime)
-        val (_, nakshatraEndStr) = findNakshatraEndTime(date, nakshatraNum, sunriseDateTime)
+        val (tithiEndAt, tithiEndStr) = findTithiEndTime(date, tithiNum, sunriseDateTime)
+        val (nakshatraEndAt, nakshatraEndStr) = findNakshatraEndTime(date, nakshatraNum, sunriseDateTime)
 
         val tithiEntry = PanchangNames.getTithi(tithiNum)
         val nakshatraEntry = PanchangNames.getNakshatra(nakshatraNum)
@@ -456,6 +458,7 @@ object AstronomyEngine {
             tithiEn = tithiEntry.nameEn,
             tithiEndTimeStrTe = "రాత్రి/పగలు $tithiEndStr వరకు",
             tithiEndTimeStrEn = "ends by $tithiEndStr",
+            tithiEndDateTime = tithiEndAt,
             pakshaTe = pakshaTe,
             pakshaEn = pakshaEn,
             nakshatraNumber = nakshatraNum,
@@ -463,6 +466,7 @@ object AstronomyEngine {
             nakshatraEn = nakshatraEntry.nameEn,
             nakshatraEndTimeStrTe = "వరకు $nakshatraEndStr",
             nakshatraEndTimeStrEn = "ends by $nakshatraEndStr",
+            nakshatraEndDateTime = nakshatraEndAt,
             yogaNumber = yogaNum,
             yogaTe = yogaEntry.nameTe,
             yogaEn = yogaEntry.nameEn,

@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Celebration
+import androidx.compose.material.icons.filled.ChildCare
 import androidx.compose.material.icons.filled.Flare
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.NightsStay
@@ -53,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -63,7 +65,9 @@ import com.example.R
 import com.example.data.model.Channel
 import com.example.data.model.ChannelsData
 import com.example.data.model.City
+import com.example.data.festivals.FestivalCalendar
 import com.example.data.model.Festival
+import com.example.data.model.FestivalCalendarItem
 import com.example.data.model.Language
 import com.example.data.model.MediaSampleData
 import com.example.data.model.MoreDestination
@@ -98,10 +102,16 @@ fun HomeScreen(
     bookmarkedIds: Set<String>,
     onOpenFestivalDetail: (Festival) -> Unit,
     onSharePanchang: () -> Unit = {},
+    eclipses: List<com.example.data.eclipses.Eclipse> = emptyList(),
     modifier: Modifier = Modifier
 ) {
     val topNews = MediaSampleData.newsList.take(3)
-    val upcomingFestival = MediaSampleData.festivals.first()
+    val context = LocalContext.current
+    val today = java.time.LocalDate.now()
+    val upcomingFestival = remember(today, selectedCity) {
+        FestivalCalendar.nextMajor(context, today, selectedCity.latitude, selectedCity.longitude)
+            ?.toHomeFestival(today)
+    }
 
     LazyColumn(
         modifier = modifier
@@ -123,8 +133,22 @@ fun HomeScreen(
             SmartGreetingSuggestionsBanner(
                 language = language,
                 panchangDate = panchangData.date,
+                selectedCity = selectedCity,
                 onOpenGreetings = { onNavigateMore(MoreDestination.GREETINGS) }
             )
+        }
+
+        // Eclipse within the next week
+        val now = java.time.LocalDateTime.now(com.example.data.eclipses.EclipseCalculator.IST)
+        upcomingEclipseWithin(eclipses, now, com.example.data.eclipses.EclipseConstants.HOME_BANNER_DAYS)?.let { eclipse ->
+            item {
+                EclipseHomeBanner(
+                    language = language,
+                    eclipse = eclipse,
+                    today = now.toLocalDate(),
+                    onOpen = { onNavigateMore(MoreDestination.GRAHANAM) }
+                )
+            }
         }
 
         // Today's Panchang Card
@@ -144,6 +168,23 @@ fun HomeScreen(
                 language = language,
                 rasi = selectedRasi,
                 onViewAllRasis = { onNavigateMore(MoreDestination.HOROSCOPE) }
+            )
+        }
+
+        // Planning a function? Shubhalekha + Muhurthams
+        item {
+            PlanningFunctionCard(
+                language = language,
+                onShubhalekha = { onNavigateMore(MoreDestination.SHUBHALEKHA) },
+                onMuhurthams = { onNavigateMore(MoreDestination.MUHURTHAMS) }
+            )
+        }
+
+        // Baby Names Entry Card
+        item {
+            BabyNamesHomeCard(
+                language = language,
+                onOpen = { onNavigateMore(MoreDestination.BABY_NAMES) }
             )
         }
 
@@ -173,12 +214,169 @@ fun HomeScreen(
         }
 
         // Upcoming Festival Card with Countdown
-        item {
-            UpcomingFestivalCard(
-                language = language,
-                festival = upcomingFestival,
-                onViewAllFestivals = { onNavigateMore(MoreDestination.FESTIVALS) },
-                onClickFestival = { onOpenFestivalDetail(upcomingFestival) }
+        upcomingFestival?.let { festival ->
+            item {
+                UpcomingFestivalCard(
+                    language = language,
+                    festival = festival,
+                    onViewAllFestivals = { onNavigateMore(MoreDestination.FESTIVALS) },
+                    onClickFestival = { onOpenFestivalDetail(festival) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EclipseHomeBanner(
+    language: Language,
+    eclipse: com.example.data.eclipses.Eclipse,
+    today: java.time.LocalDate,
+    onOpen: () -> Unit
+) {
+    val isTelugu = language == Language.TELUGU
+    val name = if (isTelugu) eclipse.nameTe else eclipse.nameEn
+    val daysLeft = java.time.temporal.ChronoUnit.DAYS.between(today, eclipse.start.toLocalDate())
+    val countdown = when {
+        daysLeft <= 0 && isTelugu -> "ఈ రోజే"
+        daysLeft <= 0 -> "Today"
+        daysLeft == 1L && isTelugu -> "రేపు"
+        daysLeft == 1L -> "Tomorrow"
+        isTelugu -> "మరో $daysLeft రోజుల్లో"
+        else -> "In $daysLeft days"
+    }
+    val time = DateTimeFormatter.ofPattern("dd MMM, hh:mm a", Locale.ENGLISH)
+    val detail = eclipse.sutakStart?.let {
+        if (isTelugu) "సూతకం ${it.format(time)} నుండి (సంప్రదాయం ప్రకారం)" else "Sutak from ${it.format(time)} (as per tradition)"
+    } ?: if (isTelugu) "స్పర్శ ${eclipse.start.format(time)}" else "Begins ${eclipse.start.format(time)}"
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onOpen)
+            .testTag("home_eclipse_banner"),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF263238)),
+        border = BorderStroke(1.dp, TempleGold)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Default.NightsStay, contentDescription = null, tint = TempleGoldLight, modifier = Modifier.size(28.dp))
+            Spacer(modifier = Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = "$name • $countdown", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(text = detail, fontSize = 11.sp, color = TempleGoldLight)
+            }
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = TempleGold)
+        }
+    }
+}
+
+private fun FestivalCalendarItem.toHomeFestival(today: java.time.LocalDate): Festival {
+    val shownDate = date.format(DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH))
+    return Festival(
+        id = id,
+        nameTe = nameTe,
+        nameEn = nameEn,
+        dateDisplayTe = shownDate,
+        dateDisplayEn = shownDate,
+        daysLeft = getDaysLeft(today).toInt(),
+        tithiTe = tithiTe,
+        tithiEn = tithiEn,
+        significanceTe = descriptionTe,
+        significanceEn = descriptionEn,
+        ritualsTe = ritualsTe,
+        ritualsEn = ritualsEn
+    )
+}
+
+@Composable
+private fun PlanningFunctionCard(language: Language, onShubhalekha: () -> Unit, onMuhurthams: () -> Unit) {
+    val isTelugu = language == Language.TELUGU
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .testTag("home_planning_card"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = TempleMaroon)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = if (isTelugu) "శుభకార్యం ప్లాన్ చేస్తున్నారా?" else "Planning a function?",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = TempleGoldLight
+            )
+            Text(
+                text = if (isTelugu) "మంచి ముహూర్తం చూసి, అందమైన శుభలేఖ తయారు చేసుకోండి." else "Find a good muhurtham and make a beautiful invitation.",
+                fontSize = 12.sp,
+                color = Color.White.copy(alpha = 0.85f)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Button(
+                    onClick = onShubhalekha,
+                    colors = ButtonDefaults.buttonColors(containerColor = TempleGold, contentColor = TempleMaroonDark),
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("home_open_shubhalekha")
+                ) { Text(Translations.tr("menu_shubhalekha", language), fontWeight = FontWeight.Bold) }
+                Button(
+                    onClick = onMuhurthams,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.15f), contentColor = Color.White),
+                    modifier = Modifier.weight(1f)
+                ) { Text(Translations.tr("menu_muhurthams", language)) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BabyNamesHomeCard(language: Language, onOpen: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onOpen)
+            .testTag("home_baby_names_card"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, TempleGold.copy(alpha = 0.4f))
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.ChildCare,
+                contentDescription = null,
+                tint = TempleSaffron,
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = Translations.tr("menu_baby_names", language),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = Translations.tr("baby_home_subtitle", language),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = TempleGold
             )
         }
     }
@@ -1054,19 +1252,20 @@ private fun UpcomingFestivalCard(
 private fun SmartGreetingSuggestionsBanner(
     language: Language,
     panchangDate: java.time.LocalDate,
+    selectedCity: City,
     onOpenGreetings: () -> Unit
 ) {
     val currentHour = remember { java.time.LocalTime.now().hour }
     val isMorning = currentHour < 11
     val isTelugu = language == Language.TELUGU
 
-    val nextFest: com.example.data.model.FestivalCalendarItem = remember(panchangDate) {
-        com.example.data.model.FestivalCalendarData.getNextFestival(panchangDate)
+    val context = LocalContext.current
+    val nextFest = remember(panchangDate, selectedCity) {
+        FestivalCalendar.nextMajor(context, panchangDate, selectedCity.latitude, selectedCity.longitude)
     }
     val daysUntilFestival: Long = remember(nextFest, panchangDate) {
-        nextFest.getDaysLeft(panchangDate)
+        nextFest?.getDaysLeft(panchangDate) ?: -1L
     }
-    val isFestivalNear = daysUntilFestival in 0L..3L
 
     Column(
         modifier = Modifier
@@ -1075,7 +1274,7 @@ private fun SmartGreetingSuggestionsBanner(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // 1. Festival Near Banner
-        if (isFestivalNear) {
+        if (nextFest != null && daysUntilFestival in 0L..3L) {
             val festName = if (isTelugu) nextFest.nameTe else nextFest.nameEn
             val festText = if (daysUntilFestival == 0L) {
                 if (isTelugu) "$festName నేడే! – మీ శుభాకాంక్షల కార్డును తయారు చేసుకోండి"

@@ -23,6 +23,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Celebration
+import androidx.compose.material.icons.filled.ChildCare
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.Settings
@@ -112,6 +114,10 @@ fun MoreScreen(
     onSaveCreation: (com.example.data.model.SavedGreeting) -> Unit = {},
     onDeleteCreation: (String) -> Unit = {},
     onShowMessage: (String) -> Unit = {},
+    babyNameShortlist: List<com.example.data.model.ShortlistedName> = emptyList(),
+    onToggleBabyNameShortlist: (com.example.data.model.ShortlistedName) -> Unit = {},
+    onBabyNamesCardShared: () -> Unit = {},
+    eclipses: List<com.example.data.eclipses.Eclipse>? = null,
     modifier: Modifier = Modifier
 ) {
     // If a sub-destination is selected, show that screen
@@ -151,6 +157,7 @@ fun MoreScreen(
         )
         MoreDestination.FESTIVALS -> FestivalsSubScreen(
             language = language,
+            selectedCity = selectedCity,
             onBack = onBack
         )
         MoreDestination.GREETINGS -> GreetingsScreen(
@@ -162,6 +169,33 @@ fun MoreScreen(
             onDeleteCreation = onDeleteCreation,
             onBack = onBack,
             onShowMessage = onShowMessage
+        )
+        MoreDestination.BABY_NAMES -> BabyNamesScreen(
+            language = language,
+            defaultCity = selectedCity,
+            shortlist = babyNameShortlist,
+            onToggleShortlist = onToggleBabyNameShortlist,
+            onCardShared = onBabyNamesCardShared,
+            onBack = onBack
+        )
+        MoreDestination.GRAHANAM -> GrahanamScreen(
+            language = language,
+            city = selectedCity,
+            eclipses = eclipses,
+            onCardShared = onBabyNamesCardShared,
+            onBack = onBack
+        )
+        MoreDestination.MUHURTHAMS -> MuhurthamScreen(
+            language = language,
+            city = selectedCity,
+            onCardShared = onBabyNamesCardShared,
+            onBack = onBack
+        )
+        MoreDestination.SHUBHALEKHA -> ShubhalekhaScreen(
+            language = language,
+            city = selectedCity,
+            onCardShared = onBabyNamesCardShared,
+            onBack = onBack
         )
         MoreDestination.SETTINGS -> SettingsSubScreen(
             language = language,
@@ -245,6 +279,42 @@ fun MoreScreen(
                     subtitleTe = "శుభాకాంక్షల కార్డులు & AI",
                     subtitleEn = "Festive Greetings & AI",
                     testTag = "more_grid_greetings"
+                ),
+                MoreGridItem(
+                    destination = MoreDestination.SHUBHALEKHA,
+                    translationKey = "menu_shubhalekha",
+                    icon = Icons.Default.AutoAwesome,
+                    color = TempleMaroon,
+                    subtitleTe = "శుభలేఖలు & ఆహ్వానాలు",
+                    subtitleEn = "Wedding & function invitations",
+                    testTag = "more_grid_shubhalekha"
+                ),
+                MoreGridItem(
+                    destination = MoreDestination.MUHURTHAMS,
+                    translationKey = "menu_muhurthams",
+                    icon = Icons.Default.CalendarMonth,
+                    color = TempleSaffron,
+                    subtitleTe = "వివాహం, గృహప్రవేశం, వాహనం",
+                    subtitleEn = "Marriage, Griha Pravesam, Vehicle",
+                    testTag = "more_grid_muhurthams"
+                ),
+                MoreGridItem(
+                    destination = MoreDestination.GRAHANAM,
+                    translationKey = "menu_grahanam",
+                    icon = Icons.Default.DarkMode,
+                    color = Color(0xFF455A64),
+                    subtitleTe = "సూర్య, చంద్ర గ్రహణ సమయాలు",
+                    subtitleEn = "Solar & lunar eclipse timings",
+                    testTag = "more_grid_grahanam"
+                ),
+                MoreGridItem(
+                    destination = MoreDestination.BABY_NAMES,
+                    translationKey = "menu_baby_names",
+                    icon = Icons.Default.ChildCare,
+                    color = Color(0xFF00897B),
+                    subtitleTe = "నక్షత్రం ప్రకారం పేర్లు",
+                    subtitleEn = "Names by Nakshatra",
+                    testTag = "more_grid_baby_names"
                 ),
                 MoreGridItem(
                     destination = MoreDestination.SETTINGS,

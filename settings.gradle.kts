@@ -19,6 +19,8 @@ dependencyResolutionManagement {
   repositories {
     google()
     mavenCentral()
+    // Astronomy Engine (eclipse calculations) is published only on JitPack.
+    maven("https://jitpack.io") { content { includeGroup("io.github.cosinekitty") } }
   }
 }
 
