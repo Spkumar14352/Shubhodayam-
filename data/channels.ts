@@ -18,7 +18,7 @@ export const channels: Channel[] = [
     name: "Bhakthi TV",
     nameTelugu: "భక్తి టీవీ",
     category: "Devotional",
-    youtubeChannelId: "UCumtYpCY26F6Jr3satUgMvA",
+    youtubeChannelId: "d0dB3kSCMmM",
     logoUrl: ""
   },
   {
@@ -26,15 +26,7 @@ export const channels: Channel[] = [
     name: "SVBC TTD Live",
     nameTelugu: "ఎస్వీబీసీ (తిరుమల లైవ్)",
     category: "Devotional",
-    youtubeChannelId: "UCS2Y83GD-fc7qqgNW5uj41g",
-    logoUrl: ""
-  },
-  {
-    id: "dd_yadagiri",
-    name: "DD Yadagiri Devotional",
-    nameTelugu: "డీడీ యాదగిరి",
-    category: "Devotional",
-    youtubeChannelId: "", // TODO: add official YouTube channel ID for DD Yadagiri
+    youtubeChannelId: "XxdarKTmJ8c",
     logoUrl: ""
   },
   {

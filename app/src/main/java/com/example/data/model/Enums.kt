@@ -32,6 +32,7 @@ enum class MoreDestination {
     MUHURTHAMS,
     SHUBHALEKHA,
     NUMEROLOGY,
+    UTILITIES,
     SETTINGS,
     PREMIUM
 }

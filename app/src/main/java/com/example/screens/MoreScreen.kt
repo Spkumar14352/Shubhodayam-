@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.ChildCare
@@ -213,6 +214,10 @@ fun MoreScreen(
             onCardShared = onNumerologyCardShared,
             onBack = onBack
         )
+        MoreDestination.UTILITIES -> com.example.utilities.UtilitiesScreen(
+            language = language,
+            onBack = onBack
+        )
         MoreDestination.SETTINGS -> SettingsSubScreen(
             language = language,
             selectedCity = selectedCity,
@@ -340,6 +345,15 @@ fun MoreScreen(
                     subtitleTe = "మూలాంకం, భాగ్యాంకం & పేరు సంఖ్య",
                     subtitleEn = "Moolank, Bhagyank & Name Number",
                     testTag = "more_grid_numerology"
+                ),
+                MoreGridItem(
+                    destination = MoreDestination.UTILITIES,
+                    translationKey = "menu_utilities",
+                    icon = Icons.Default.Calculate,
+                    color = Color(0xFF00897B),
+                    subtitleTe = "EMI, వడ్డీ, చిట్టీ, కొలతలు",
+                    subtitleEn = "EMI, vaddi, chit, converters",
+                    testTag = "more_grid_utilities"
                 ),
                 MoreGridItem(
                     destination = MoreDestination.SETTINGS,
