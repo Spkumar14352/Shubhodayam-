@@ -1,3 +1,4 @@
+import java.util.Properties
 import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy
 
 plugins {
@@ -6,6 +7,14 @@ plugins {
   // alias(libs.plugins.google.devtools.ksp)
   alias(libs.plugins.secrets)
   alias(libs.plugins.google.services)
+}
+
+fun localProperty(name: String): String {
+  val file = rootProject.file("local.properties")
+  if (!file.exists()) return ""
+  val properties = Properties()
+  file.inputStream().use { properties.load(it) }
+  return properties.getProperty(name).orEmpty().trim()
 }
 
 android {
@@ -20,6 +29,11 @@ android {
     versionName = "1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+    // Optional: YOUTUBE_API_KEY=... in local.properties lets Live TV ask YouTube directly who is live.
+    // Blank means no API calls; channels still show with a "Watch on YouTube" button.
+    // The LIVE_STATUS_URL server (in .env) is preferred when set, since it keeps the key off the device.
+    buildConfigField("String", "YOUTUBE_API_KEY", "\"${localProperty("YOUTUBE_API_KEY").replace("\\", "\\\\").replace("\"", "\\\"")}\"")
   }
 
   // Do not remove or modify these signingConfigs. They are necessary for building, installing,
@@ -156,6 +170,7 @@ dependencies {
   implementation(libs.logging.interceptor)
   implementation(libs.moshi.kotlin)
   implementation(libs.okhttp)
+  implementation(libs.android.youtube.player)
   // implementation(libs.play.services.location)
   implementation(libs.retrofit)
   implementation(libs.astronomy)

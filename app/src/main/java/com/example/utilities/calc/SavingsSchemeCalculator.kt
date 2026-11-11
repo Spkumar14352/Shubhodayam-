@@ -36,7 +36,8 @@ object SavingsSchemeCalculator {
     /** Monthly employee + employer EPF share. The employer's 8.33% EPS part (on up to ₹15,000) goes to pension instead. */
     fun epfMonthlyContribution(basicPlusDa: Double): Double {
         val employee = basicPlusDa * EPF_EMPLOYEE_PERCENT / 100.0
-        val employerToEps = minOf(basicPlusDa, EPS_WAGE_CEILING) * EPS_PERCENT / 100.0
+        // EPFO rounds to the rupee, so the pension share on the ₹15,000 ceiling is ₹1,250.
+        val employerToEps = Math.round(minOf(basicPlusDa, EPS_WAGE_CEILING) * EPS_PERCENT / 100.0).toDouble()
         val employerToEpf = basicPlusDa * EPF_EMPLOYEE_PERCENT / 100.0 - employerToEps
         return employee + employerToEpf
     }

@@ -57,7 +57,6 @@ data class MainUiState(
     val panchangData: PanchangData = PanchangProvider.getPanchangForDate(LocalDate.now(), CityData.defaultCity),
     val selectedChannel: Channel = ChannelsData.allChannels.first(),
     val selectedLiveCategory: String = "ALL", // "FAVORITES", "ALL", "Devotional", "Telugu News", "National News", "Entertainment"
-    val liveStatus: com.example.data.repository.LiveStatusState = com.example.data.repository.LiveStatusState.Loading,
     /** Null until the first calculation finishes. */
     val eclipses: List<com.example.data.eclipses.Eclipse>? = null,
     val radioPlayerState: RadioPlayerState = RadioPlayerState(),
@@ -85,7 +84,6 @@ data class MainUiState(
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = UserPreferencesRepository(application)
     private val radioRepository = RadioRepository()
-    private val liveStatusRepository = com.example.data.repository.LiveStatusRepository()
     private val radioPlayerManager = RadioPlayerManager(application)
     private val newsRepository = com.example.data.repository.NewsRepository(application)
     private val cricketRepository = com.example.data.repository.CricketRepository(application)
@@ -284,13 +282,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // --- Live TV Methods ---
-    fun loadLiveStatus() {
-        viewModelScope.launch {
-            val result = liveStatusRepository.fetch()
-            _uiState.value = _uiState.value.copy(liveStatus = result)
-        }
-    }
-
     fun selectLiveCategory(category: String) {
         _uiState.value = _uiState.value.copy(selectedLiveCategory = category)
     }

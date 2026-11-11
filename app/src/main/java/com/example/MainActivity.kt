@@ -190,8 +190,6 @@ class MainActivity : ComponentActivity() {
                                             language = uiState.userPreferences.language,
                                             selectedChannel = uiState.selectedChannel,
                                             selectedCategory = uiState.selectedLiveCategory,
-                                            liveStatus = uiState.liveStatus,
-                                            onScreenOpened = { viewModel.loadLiveStatus() },
                                             favoriteChannelIds = uiState.userPreferences.favoriteChannelIds,
                                             onSelectCategory = { cat -> viewModel.selectLiveCategory(cat) },
                                             onSelectChannel = { channel -> viewModel.selectLiveChannel(channel) },
