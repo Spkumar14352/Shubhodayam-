@@ -87,6 +87,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
+import com.example.data.model.FestivalCalendarItem
 import com.example.AiPanditMessage
 import com.example.R
 import com.example.data.festivals.FestivalCalendar
@@ -121,7 +122,7 @@ fun SubScreenHeader(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = TempleMaroonDark,
+        color = MaterialTheme.colorScheme.surface,
         tonalElevation = 4.dp
     ) {
         Row(
@@ -137,12 +138,12 @@ fun SubScreenHeader(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = TempleGoldLight
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
             Text(
                 text = title,
-                color = TempleGoldLight,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -216,8 +217,8 @@ fun RadioSubScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 6.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = TempleMaroonDark),
-                border = BorderStroke(1.dp, TempleGold)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
             ) {
                 Row(
                     modifier = Modifier
@@ -229,12 +230,12 @@ fun RadioSubScreen(
                         modifier = Modifier
                             .size(50.dp)
                             .clip(CircleShape)
-                            .background(TempleGold),
+                            .background(MaterialTheme.colorScheme.primary),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = currentStation.getInitials(),
-                            color = TempleMaroonDark,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -245,7 +246,7 @@ fun RadioSubScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = currentStation.name,
-                            color = TempleGoldLight,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
@@ -253,7 +254,7 @@ fun RadioSubScreen(
                         )
                         Text(
                             text = if (currentStation.tags.isNotBlank()) currentStation.tags.take(30) else "Live Radio Stream",
-                            color = Color.White.copy(alpha = 0.8f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 11.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -261,7 +262,7 @@ fun RadioSubScreen(
                         if (playerState.isLoading) {
                             Text(
                                 text = Translations.tr("radio_connecting", language),
-                                color = TempleSaffron,
+                                color = MaterialTheme.colorScheme.secondary,
                                 fontSize = 11.sp
                             )
                         }
@@ -395,6 +396,34 @@ fun RadioSubScreen(
                             }
 
                             Spacer(modifier = Modifier.width(8.dp))
+
+                            // Status Indicator Dot (Green for active/live stream, Grey for offline)
+                            val isStationLive = station.urlResolved.isNotBlank() || station.url.isNotBlank()
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = if (isStationLive) Color(0xFF1B5E20).copy(alpha = 0.15f) else Color.Gray.copy(alpha = 0.15f)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(6.dp)
+                                            .clip(CircleShape)
+                                            .background(if (isStationLive) Color(0xFF4CAF50) else Color(0xFF9E9E9E))
+                                    )
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text(
+                                        text = if (isStationLive) "LIVE" else "OFFLINE",
+                                        fontSize = 8.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isStationLive) Color(0xFF2E7D32) else Color(0xFF757575)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(6.dp))
 
                             if (station.bitrate > 0) {
                                 Surface(
@@ -1150,20 +1179,32 @@ fun FestivalsSubScreen(
     val context = LocalContext.current
     val today = remember { LocalDate.now() }
     var showVrats by remember { mutableStateOf(false) }
+    var showPastFestivals by remember { mutableStateOf(false) }
 
-    // This year and next, calculated for the user's city.
-    val festivals = remember(selectedCity, today) {
-        listOf(today.year, today.year + 1).flatMap {
-            FestivalCalendar.forYear(context, it, selectedCity.latitude, selectedCity.longitude)
-        }
-    }
-    val nextFestival = remember(festivals) {
-        festivals.firstOrNull { it.isMajor && !it.date.isBefore(today) }
+    // Rolling 14 months of festivals calculated for the user's city
+    val allFestivals = remember(selectedCity, today) {
+        FestivalCalendar.forRolling14Months(context, today, selectedCity.latitude, selectedCity.longitude)
     }
 
-    // Group festivals by month
-    val groupedFestivals = remember(festivals, showVrats, language) {
-        festivals.filter { showVrats || it.isMajor }.groupBy {
+    val filteredFestivals = remember(allFestivals, showVrats) {
+        allFestivals.filter { showVrats || it.isMajor }
+    }
+
+    val upcomingFestivals = remember(filteredFestivals, today) {
+        filteredFestivals.filter { !it.date.isBefore(today) }
+    }
+
+    val pastFestivals = remember(filteredFestivals, today) {
+        filteredFestivals.filter { it.date.isBefore(today) }
+    }
+
+    val nextFestival = remember(allFestivals, today) {
+        allFestivals.firstOrNull { it.isMajor && !it.date.isBefore(today) }
+    }
+
+    // Group upcoming festivals by month
+    val groupedUpcoming = remember(upcomingFestivals, language) {
+        upcomingFestivals.groupBy {
             if (language == Language.TELUGU) it.monthGroupTe else it.monthGroupEn
         }
     }
@@ -1187,8 +1228,8 @@ fun FestivalsSubScreen(
                         .fillMaxWidth()
                         .testTag("next_festival_countdown_card"),
                     shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = TempleMaroonDark),
-                    border = BorderStroke(1.5.dp, TempleGold)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f))
                 ) {
                     Column(
                         modifier = Modifier
@@ -1204,12 +1245,12 @@ fun FestivalsSubScreen(
                                 text = if (language == Language.TELUGU) "రాబోయే ప్రధాన పర్వదినం" else "Upcoming Major Festival",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = TempleGoldLight
+                                color = MaterialTheme.colorScheme.primary
                             )
 
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = TempleSaffron
+                                color = MaterialTheme.colorScheme.secondary
                             ) {
                                 val countdownText = when {
                                     daysLeft <= 0 -> Translations.tr("countdown_today", language)
@@ -1218,7 +1259,7 @@ fun FestivalsSubScreen(
                                 }
                                 Text(
                                     text = countdownText,
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onSecondary,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -1232,15 +1273,33 @@ fun FestivalsSubScreen(
                             text = if (language == Language.TELUGU) nextFestival.nameTe else nextFestival.nameEn,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = TempleGoldLight
+                            color = MaterialTheme.colorScheme.onSurface
                         )
 
                         Text(
                             text = "${nextFestival.dateString} • ${if (language == Language.TELUGU) nextFestival.tithiTe else nextFestival.tithiEn}",
                             fontSize = 13.sp,
-                            color = Color.White.copy(alpha = 0.85f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight = FontWeight.Medium
                         )
+
+                        if (nextFestival.isVerified) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = TempleGold.copy(alpha = 0.25f),
+                                border = BorderStroke(1.dp, TempleGold),
+                                modifier = Modifier.testTag("festival_verified_${nextFestival.id}")
+                            ) {
+                                Text(
+                                    text = "✓ ${Translations.tr("festival_verified", language)}",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TempleGoldLight,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
 
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -1274,8 +1333,8 @@ fun FestivalsSubScreen(
                 }
             }
 
-            // Month grouped list
-            groupedFestivals.forEach { (monthLabel, festivalsInMonth) ->
+            // Month grouped list of upcoming festivals
+            groupedUpcoming.forEach { (monthLabel, festivalsInMonth) ->
                 item {
                     Text(
                         text = monthLabel,
@@ -1287,104 +1346,166 @@ fun FestivalsSubScreen(
                 }
 
                 items(festivalsInMonth) { festival ->
+                    FestivalCardItem(festival = festival, language = language, isPast = false)
+                }
+            }
+
+            // Collapsed Past Festivals Section at bottom
+            if (pastFestivals.isNotEmpty()) {
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .testTag("festival_card_${festival.id}"),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, TempleGold.copy(alpha = 0.35f)),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { showPastFestivals = !showPastFestivals }
+                            .testTag("toggle_past_festivals"),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)),
+                        border = BorderStroke(1.dp, TempleGold.copy(alpha = 0.3f))
                     ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = if (language == Language.TELUGU) festival.nameTe else festival.nameEn,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.weight(1f)
-                                )
-
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = TempleGold.copy(alpha = 0.15f)
-                                ) {
-                                    Text(
-                                        text = festival.dateString,
-                                        color = TempleGoldDark,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
                             Text(
-                                text = if (language == Language.TELUGU) festival.tithiTe else festival.tithiEn,
-                                fontSize = 12.sp,
-                                color = TempleSaffron,
-                                fontWeight = FontWeight.SemiBold
+                                text = if (language == Language.TELUGU)
+                                    "గత పండుగలు (${pastFestivals.size})"
+                                else
+                                    "Past Festivals (${pastFestivals.size})",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
-
-                            if (festival.isVerified) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(6.dp),
-                                    color = AuspiciousGreen.copy(alpha = 0.15f),
-                                    modifier = Modifier.testTag("festival_verified_${festival.id}")
-                                ) {
-                                    Text(
-                                        text = "✓ ${Translations.tr("festival_verified", language)}",
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = AuspiciousGreen,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                    )
-                                }
-                            }
-
-                            val note = if (language == Language.TELUGU) festival.noteTe else festival.noteEn
-                            if (note.isNotBlank()) {
-                                Text(
-                                    text = note,
-                                    fontSize = 11.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(6.dp))
-
                             Text(
-                                text = if (language == Language.TELUGU) festival.descriptionTe else festival.descriptionEn,
-                                fontSize = 12.sp,
-                                lineHeight = 17.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                text = if (showPastFestivals)
+                                    (if (language == Language.TELUGU) "దాచు ▲" else "Hide ▲")
+                                else
+                                    (if (language == Language.TELUGU) "చూపించు ▼" else "Show ▼"),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TempleMaroon
                             )
-
-                            if (festival.ritualsTe.isNotBlank() || festival.ritualsEn.isNotBlank()) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(
-                                        text = "విశిష్ట పూజ: ${if (language == Language.TELUGU) festival.ritualsTe else festival.ritualsEn}",
-                                        fontSize = 11.sp,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.padding(8.dp)
-                                    )
-                                }
-                            }
                         }
                     }
+                }
+
+                if (showPastFestivals) {
+                    items(pastFestivals) { festival ->
+                        FestivalCardItem(festival = festival, language = language, isPast = true)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FestivalCardItem(
+    festival: FestivalCalendarItem,
+    language: Language,
+    isPast: Boolean = false
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("festival_card_${festival.id}"),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isPast) MaterialTheme.colorScheme.surface.copy(alpha = 0.75f) else MaterialTheme.colorScheme.surface
+        ),
+        border = BorderStroke(1.dp, TempleGold.copy(alpha = if (isPast) 0.2f else 0.35f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isPast) 0.dp else 1.dp)
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (language == Language.TELUGU) festival.nameTe else festival.nameEn,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = TempleGold.copy(alpha = 0.15f)
+                ) {
+                    Text(
+                        text = festival.dateString,
+                        color = TempleGoldDark,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = if (language == Language.TELUGU) festival.tithiTe else festival.tithiEn,
+                fontSize = 12.sp,
+                color = TempleSaffron,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            if (festival.isVerified) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = TempleGold.copy(alpha = 0.2f),
+                    border = BorderStroke(1.dp, TempleGold),
+                    modifier = Modifier.testTag("festival_verified_${festival.id}")
+                ) {
+                    Text(
+                        text = "✓ ${Translations.tr("festival_verified", language)}",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TempleGoldDark,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
+
+            val note = if (language == Language.TELUGU) festival.noteTe else festival.noteEn
+            if (note.isNotBlank()) {
+                Text(
+                    text = note,
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = if (language == Language.TELUGU) festival.descriptionTe else festival.descriptionEn,
+                fontSize = 12.sp,
+                lineHeight = 17.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            if (festival.ritualsTe.isNotBlank() || festival.ritualsEn.isNotBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "విశిష్ట పూజ: ${if (language == Language.TELUGU) festival.ritualsTe else festival.ritualsEn}",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
             }
         }
@@ -1573,7 +1694,7 @@ fun SettingsSubScreen(
                                 RadioButton(
                                     selected = themeMode == mode,
                                     onClick = { onThemeModeChange(mode) },
-                                    colors = RadioButtonDefaults.colors(selectedColor = TempleGold)
+                                    colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(text = label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface)

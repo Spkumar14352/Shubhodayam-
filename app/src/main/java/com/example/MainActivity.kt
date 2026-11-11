@@ -113,6 +113,11 @@ class MainActivity : ComponentActivity() {
                                         onCityClick = {
                                             viewModel.selectTab(TabItem.MORE)
                                             viewModel.navigateToMoreDestination(MoreDestination.SETTINGS)
+                                        },
+                                        isDarkTheme = isDarkTheme,
+                                        onToggleTheme = {
+                                            val nextMode = if (isDarkTheme) ThemeMode.LIGHT else ThemeMode.DARK
+                                            viewModel.setThemeMode(nextMode)
                                         }
                                     )
                                 },
@@ -261,6 +266,12 @@ class MainActivity : ComponentActivity() {
                                             babyNameShortlist = uiState.userPreferences.babyNameShortlist,
                                             onToggleBabyNameShortlist = { viewModel.toggleBabyNameShortlist(it) },
                                             onBabyNamesCardShared = { viewModel.onCardShared() },
+                                            numerologyProfiles = uiState.userPreferences.numerologyProfiles,
+                                            selectedNumerologyProfileId = uiState.userPreferences.selectedNumerologyProfileId,
+                                            onSaveNumerologyProfile = { viewModel.saveNumerologyProfile(it) },
+                                            onDeleteNumerologyProfile = { viewModel.deleteNumerologyProfile(it) },
+                                            onSelectNumerologyProfile = { viewModel.selectNumerologyProfile(it) },
+                                            onNumerologyCardShared = { viewModel.onCardShared() },
                                             eclipses = uiState.eclipses
                                         )
                                     }

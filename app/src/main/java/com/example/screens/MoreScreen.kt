@@ -117,6 +117,12 @@ fun MoreScreen(
     babyNameShortlist: List<com.example.data.model.ShortlistedName> = emptyList(),
     onToggleBabyNameShortlist: (com.example.data.model.ShortlistedName) -> Unit = {},
     onBabyNamesCardShared: () -> Unit = {},
+    numerologyProfiles: List<com.example.data.model.NumerologyProfile> = emptyList(),
+    selectedNumerologyProfileId: String? = null,
+    onSaveNumerologyProfile: (com.example.data.model.NumerologyProfile) -> Unit = {},
+    onDeleteNumerologyProfile: (String) -> Unit = {},
+    onSelectNumerologyProfile: (String) -> Unit = {},
+    onNumerologyCardShared: () -> Unit = {},
     eclipses: List<com.example.data.eclipses.Eclipse>? = null,
     modifier: Modifier = Modifier
 ) {
@@ -195,6 +201,16 @@ fun MoreScreen(
             language = language,
             city = selectedCity,
             onCardShared = onBabyNamesCardShared,
+            onBack = onBack
+        )
+        MoreDestination.NUMEROLOGY -> NumerologyScreen(
+            language = language,
+            profiles = numerologyProfiles,
+            selectedProfileId = selectedNumerologyProfileId,
+            onSaveProfile = onSaveNumerologyProfile,
+            onDeleteProfile = onDeleteNumerologyProfile,
+            onSelectProfile = onSelectNumerologyProfile,
+            onCardShared = onNumerologyCardShared,
             onBack = onBack
         )
         MoreDestination.SETTINGS -> SettingsSubScreen(
@@ -315,6 +331,15 @@ fun MoreScreen(
                     subtitleTe = "నక్షత్రం ప్రకారం పేర్లు",
                     subtitleEn = "Names by Nakshatra",
                     testTag = "more_grid_baby_names"
+                ),
+                MoreGridItem(
+                    destination = MoreDestination.NUMEROLOGY,
+                    translationKey = "menu_numerology",
+                    icon = Icons.Default.AutoAwesome,
+                    color = TempleSaffron,
+                    subtitleTe = "మూలాంకం, భాగ్యాంకం & పేరు సంఖ్య",
+                    subtitleEn = "Moolank, Bhagyank & Name Number",
+                    testTag = "more_grid_numerology"
                 ),
                 MoreGridItem(
                     destination = MoreDestination.SETTINGS,

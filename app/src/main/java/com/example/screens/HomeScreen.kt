@@ -188,6 +188,14 @@ fun HomeScreen(
             )
         }
 
+        // Numerology Entry Card
+        item {
+            NumerologyHomeCard(
+                language = language,
+                onOpen = { onNavigateMore(MoreDestination.NUMEROLOGY) }
+            )
+        }
+
         // Live Now Horizontal Scroll
         item {
             LiveNowChannelsSection(
@@ -303,32 +311,39 @@ private fun PlanningFunctionCard(language: Language, onShubhalekha: () -> Unit, 
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .testTag("home_planning_card"),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = TempleMaroon)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = if (isTelugu) "శుభకార్యం ప్లాన్ చేస్తున్నారా?" else "Planning a function?",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = TempleGoldLight
+                color = MaterialTheme.colorScheme.primary
             )
             Text(
                 text = if (isTelugu) "మంచి ముహూర్తం చూసి, అందమైన శుభలేఖ తయారు చేసుకోండి." else "Find a good muhurtham and make a beautiful invitation.",
                 fontSize = 12.sp,
-                color = Color.White.copy(alpha = 0.85f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Button(
                     onClick = onShubhalekha,
-                    colors = ButtonDefaults.buttonColors(containerColor = TempleGold, contentColor = TempleMaroonDark),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("home_open_shubhalekha")
                 ) { Text(Translations.tr("menu_shubhalekha", language), fontWeight = FontWeight.Bold) }
                 Button(
                     onClick = onMuhurthams,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.15f), contentColor = Color.White),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
                     modifier = Modifier.weight(1f)
                 ) { Text(Translations.tr("menu_muhurthams", language)) }
             }
@@ -369,6 +384,60 @@ private fun BabyNamesHomeCard(language: Language, onOpen: () -> Unit) {
                 )
                 Text(
                     text = Translations.tr("baby_home_subtitle", language),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = TempleGold
+            )
+        }
+    }
+}
+
+@Composable
+private fun NumerologyHomeCard(language: Language, onOpen: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onOpen)
+            .testTag("home_numerology_card"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, TempleGold.copy(alpha = 0.4f))
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(TempleSaffron.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = TempleSaffron,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = Translations.tr("menu_numerology", language),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = Translations.tr("numerology_home_subtitle", language),
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -960,7 +1029,7 @@ private fun LiveChannelCard(
                     )
                 }
 
-                // Live Badge top right
+                // Live Badge top right with status dot
                 Surface(
                     shape = RoundedCornerShape(4.dp),
                     color = LiveRed,
@@ -968,13 +1037,24 @@ private fun LiveChannelCard(
                         .align(Alignment.TopEnd)
                         .padding(6.dp)
                 ) {
-                    Text(
-                        text = "LIVE",
-                        color = Color.White,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(5.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF4CAF50))
+                        )
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(
+                            text = "LIVE",
+                            color = Color.White,
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 // Category tag bottom left
@@ -1286,9 +1366,9 @@ private fun SmartGreetingSuggestionsBanner(
 
             Card(
                 shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.5.dp, TempleGold),
+                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
                 colors = CardDefaults.cardColors(
-                    containerColor = TempleMaroon
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1308,14 +1388,14 @@ private fun SmartGreetingSuggestionsBanner(
                     ) {
                         Surface(
                             shape = CircleShape,
-                            color = TempleSaffron,
+                            color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(36.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.Celebration,
                                     contentDescription = null,
-                                    tint = Color.White,
+                                    tint = MaterialTheme.colorScheme.onSecondary,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -1326,14 +1406,14 @@ private fun SmartGreetingSuggestionsBanner(
                                 text = festText,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFFF7EC),
+                                color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = if (isTelugu) "వాట్సాప్ కార్డు తయారు చేయండి →" else "Make WhatsApp Card →",
                                 fontSize = 11.sp,
-                                color = TempleGold
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -1345,9 +1425,9 @@ private fun SmartGreetingSuggestionsBanner(
         if (isMorning) {
             Card(
                 shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.dp, TempleSaffron.copy(alpha = 0.5f)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
                 colors = CardDefaults.cardColors(
-                    containerColor = TempleMaroonDark
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1367,14 +1447,14 @@ private fun SmartGreetingSuggestionsBanner(
                     ) {
                         Surface(
                             shape = CircleShape,
-                            color = TempleGold,
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(36.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.AutoAwesome,
                                     contentDescription = null,
-                                    tint = TempleMaroonDark,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -1385,14 +1465,14 @@ private fun SmartGreetingSuggestionsBanner(
                                 text = if (isTelugu) "ఉదయపు శుభాకాంక్షలు పంపండి" else "Send Good Morning wishes",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFFF7EC)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = if (isTelugu)
                                     "మీ పేరు, ఫోటోతో శుభోదయం కార్డును పంపండి →"
                                 else "Share customized morning wishes with your name & photo →",
                                 fontSize = 11.sp,
-                                color = TempleSaffron
+                                color = MaterialTheme.colorScheme.secondary
                             )
                         }
                     }

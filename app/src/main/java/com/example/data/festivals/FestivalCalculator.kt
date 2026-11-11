@@ -25,7 +25,12 @@ class FestivalCalculator(private val data: FestivalData) {
         val verified: Boolean = false
     )
 
-    fun calculate(year: Int, lat: Double, lon: Double): List<FestivalCalendarItem> {
+    fun calculate(
+        year: Int,
+        lat: Double,
+        lon: Double,
+        applyOverrides: Boolean = true
+    ): List<FestivalCalendarItem> {
         val from = LocalDate.of(year, 1, 1).minusDays(60).atStartOfDay()
         val to = LocalDate.of(year, 12, 31).plusDays(60).atStartOfDay()
         val months = LunarCalendar.monthsBetween(from, to)
@@ -95,6 +100,75 @@ class FestivalCalculator(private val data: FestivalData) {
             }
         }
 
+        // Start of every Telugu lunar month (Shukla Pratipada at sunrise)
+        months.forEach { month ->
+            val day = place.dayOf(month, 1, Kala.SUNRISE)
+            val monthId = "${month.nameEn.lowercase()}_masam_start"
+            val isKartikaStart = (month.index == 7 && !month.isAdhika)
+            // If not already present for this date:
+            if (found.none { (it.text.id == monthId || (isKartikaStart && it.text.id == "karthika_masam_start")) && it.date == day }) {
+                val label = tithiLabel(month, 1)
+                found += Found(
+                    text = FestivalText(
+                        id = monthId,
+                        nameEn = "${month.nameEn} Masam begins",
+                        nameTe = "${month.nameTe} మాసారంభం",
+                        descriptionEn = "First day of the ${month.nameEn} lunar month (Shukla Pratipada).",
+                        descriptionTe = "${month.nameTe} శుద్ధ పాడ్యమి తిథితో తెలుగు చాంద్రమాస ప్రారంభం."
+                    ),
+                    date = day,
+                    major = true,
+                    tithiEn = label.first,
+                    tithiTe = label.second,
+                    absoluteTithi = 1
+                )
+            }
+        }
+
+        // Every Monday inside Kartika month (1st, 2nd, 3rd, 4th, 5th)
+        months.filter { it.index == 7 && !it.isAdhika }.forEach { month ->
+            val kartikaStart = place.dayOf(month, 1, Kala.SUNRISE)
+            val kartikaEnd = place.dayOf(month, 30, Kala.SUNRISE)
+            var mondayIndex = 1
+            var curDate = kartikaStart
+            while (!curDate.isAfter(kartikaEnd)) {
+                if (curDate.dayOfWeek == java.time.DayOfWeek.MONDAY) {
+                    val ordinalTe = when (mondayIndex) {
+                        1 -> "1వ"
+                        2 -> "2వ"
+                        3 -> "3వ"
+                        4 -> "4వ"
+                        5 -> "5వ"
+                        else -> "${mondayIndex}వ"
+                    }
+                    val ordinalEn = when (mondayIndex) {
+                        1 -> "1st"
+                        2 -> "2nd"
+                        3 -> "3rd"
+                        4 -> "4th"
+                        5 -> "5th"
+                        else -> "${mondayIndex}th"
+                    }
+                    val label = place.sunriseLabel(curDate)
+                    found += Found(
+                        text = FestivalText(
+                            id = "karthika_somavaram_$mondayIndex",
+                            nameEn = "$ordinalEn Karthika Somavaram",
+                            nameTe = "$ordinalTe కార్తీక సోమవారం",
+                            descriptionEn = "Sacred Monday observance during Karthika month dedicated to Lord Shiva with fasting, abhishekam, and evening oil lamp lighting.",
+                            descriptionTe = "శివారాధనకు అత్యంత విశిష్టమైన కార్తీక సోమవార వ్రతం, ఉపవాసం, రుద్రాభిషేకం మరియు నక్షత్ర దర్శనానంతరం భోజనం."
+                        ),
+                        date = curDate,
+                        major = true,
+                        tithiEn = label.first,
+                        tithiTe = label.second
+                    )
+                    mondayIndex++
+                }
+                curDate = curDate.plusDays(1)
+            }
+        }
+
         // A recurring vrat on the same day and tithi as a named festival adds nothing.
         val majorDays = found.filter { it.major }.map { it.date to it.absoluteTithi }.toSet()
         found.removeAll { !it.major && it.absoluteTithi != null && (it.date to it.absoluteTithi) in majorDays }
@@ -114,7 +188,9 @@ class FestivalCalculator(private val data: FestivalData) {
             }
         }
 
-        applyOverrides(found, year, place)
+        if (applyOverrides) {
+            applyOverrides(found, year, place)
+        }
 
         return found
             .filter { it.date.year == year }
@@ -124,6 +200,35 @@ class FestivalCalculator(private val data: FestivalData) {
 
     // Overrides replace a calculated date (or add one the rules missed) and mark it verified.
     private fun applyOverrides(found: MutableList<Found>, year: Int, place: Place) {
+        // 1. Programmatic Kotlin overrides from FestivalOverrides
+        com.example.data.FestivalOverrides.all().filter { it.key.second == year }.forEach { (key, entry) ->
+            val id = key.first
+            val existing = found.filter { it.text.id == id && it.date.year == year }
+            val template = existing.firstOrNull()
+                ?: knownTexts()[id]?.let { (text, major) ->
+                    Found(text, entry.date, major, "", "")
+                }
+                ?: return@forEach
+            found.removeAll(existing)
+            val (tithiEn, tithiTe) = if (template.tithiEn.isNotEmpty()) {
+                template.tithiEn to template.tithiTe
+            } else {
+                place.sunriseLabel(entry.date)
+            }
+            found += Found(
+                text = template.text,
+                date = entry.date,
+                major = template.major,
+                tithiEn = tithiEn,
+                tithiTe = tithiTe,
+                absoluteTithi = template.absoluteTithi,
+                noteEn = entry.source,
+                noteTe = entry.source,
+                verified = entry.isVerified
+            )
+        }
+
+        // 2. Overrides from data.overrides (TypeScript / assets)
         data.overrides.filter { it.year == year }.forEach { override ->
             val existing = found.filter { it.text.id == override.id && it.date.year == year }
             val template = existing.firstOrNull()

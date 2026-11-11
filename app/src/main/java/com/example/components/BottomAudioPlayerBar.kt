@@ -7,14 +7,12 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -38,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,12 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.model.Language
 import com.example.i18n.Translations
 import com.example.services.RadioPlayerState
-import com.example.ui.theme.InauspiciousRed
-import com.example.ui.theme.TempleGold
-import com.example.ui.theme.TempleGoldLight
-import com.example.ui.theme.TempleMaroon
-import com.example.ui.theme.TempleMaroonDark
-import com.example.ui.theme.TempleSaffron
+import com.example.ui.theme.muhurthamColors
 
 @Composable
 fun BottomAudioPlayerBar(
@@ -85,8 +76,8 @@ fun BottomAudioPlayerBar(
                         .fillMaxWidth()
                         .padding(bottom = 4.dp),
                     shape = RoundedCornerShape(10.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
-                    border = BorderStroke(1.dp, InauspiciousRed)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.muhurthamColors.inauspiciousRedBg),
+                    border = BorderStroke(1.dp, MaterialTheme.muhurthamColors.inauspiciousRed)
                 ) {
                     Row(
                         modifier = Modifier
@@ -99,7 +90,7 @@ fun BottomAudioPlayerBar(
                             Icon(
                                 imageVector = Icons.Default.Warning,
                                 contentDescription = null,
-                                tint = InauspiciousRed,
+                                tint = MaterialTheme.muhurthamColors.inauspiciousRed,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
@@ -107,7 +98,7 @@ fun BottomAudioPlayerBar(
                                 text = Translations.tr("station_unavailable", language),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = InauspiciousRed,
+                                color = MaterialTheme.muhurthamColors.inauspiciousRed,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -120,7 +111,7 @@ fun BottomAudioPlayerBar(
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Dismiss Error",
-                                tint = InauspiciousRed,
+                                tint = MaterialTheme.muhurthamColors.inauspiciousRed,
                                 modifier = Modifier.size(14.dp)
                             )
                         }
@@ -133,9 +124,9 @@ fun BottomAudioPlayerBar(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = TempleMaroonDark),
-                    border = BorderStroke(1.5.dp, TempleGold),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -153,14 +144,14 @@ fun BottomAudioPlayerBar(
                                 modifier = Modifier
                                     .size(36.dp)
                                     .clip(CircleShape)
-                                    .background(TempleGold),
+                                    .background(MaterialTheme.colorScheme.primary),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = station.getInitials(),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = TempleMaroonDark
+                                    color = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
 
@@ -169,7 +160,7 @@ fun BottomAudioPlayerBar(
                             Column {
                                 Text(
                                     text = station.name,
-                                    color = TempleGoldLight,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 1,
@@ -178,11 +169,11 @@ fun BottomAudioPlayerBar(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Surface(
                                         shape = RoundedCornerShape(4.dp),
-                                        color = TempleSaffron.copy(alpha = 0.25f)
+                                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
                                     ) {
                                         Text(
                                             text = "LIVE RADIO",
-                                            color = TempleSaffron,
+                                            color = MaterialTheme.colorScheme.secondary,
                                             fontSize = 9.sp,
                                             fontWeight = FontWeight.Bold,
                                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
@@ -191,7 +182,7 @@ fun BottomAudioPlayerBar(
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
                                         text = "${station.bitrate} kbps",
-                                        color = Color.White.copy(alpha = 0.7f),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         fontSize = 10.sp
                                     )
                                 }
@@ -206,7 +197,7 @@ fun BottomAudioPlayerBar(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     CircularProgressIndicator(
-                                        color = TempleGold,
+                                        color = MaterialTheme.colorScheme.primary,
                                         strokeWidth = 2.dp,
                                         modifier = Modifier.size(20.dp)
                                     )
@@ -217,13 +208,13 @@ fun BottomAudioPlayerBar(
                                     modifier = Modifier
                                         .size(36.dp)
                                         .clip(CircleShape)
-                                        .background(TempleGold)
+                                        .background(MaterialTheme.colorScheme.primary)
                                         .testTag("fixed_player_play_pause_btn")
                                 ) {
                                     Icon(
                                         imageVector = if (playerState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                                         contentDescription = "Play/Pause",
-                                        tint = TempleMaroonDark,
+                                        tint = MaterialTheme.colorScheme.onPrimary,
                                         modifier = Modifier.size(22.dp)
                                     )
                                 }
@@ -241,7 +232,7 @@ fun BottomAudioPlayerBar(
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Stop Radio",
-                                    tint = Color.White.copy(alpha = 0.8f),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }

@@ -518,6 +518,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun saveNumerologyProfile(profile: com.example.data.model.NumerologyProfile) {
+        repository.saveNumerologyProfile(profile)
+    }
+
+    fun deleteNumerologyProfile(profileId: String) {
+        repository.deleteNumerologyProfile(profileId)
+    }
+
+    fun selectNumerologyProfile(profileId: String) {
+        repository.selectNumerologyProfile(profileId)
+    }
+
     override fun onCleared() {
         super.onCleared()
         radioPlayerManager.stop()

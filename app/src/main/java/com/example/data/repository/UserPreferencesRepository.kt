@@ -2,6 +2,11 @@ package com.example.data.repository
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.example.data.model.City
 import com.example.data.model.CityData
 import com.example.data.model.Language
@@ -9,9 +14,15 @@ import com.example.data.model.Rasi
 import com.example.data.model.RasiData
 import com.example.data.model.ShortlistedName
 import com.example.data.model.ThemeMode
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+private val Context.userDataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences_store")
+private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
 
 data class UserPreferences(
     val language: Language = Language.TELUGU,
@@ -29,10 +40,14 @@ data class UserPreferences(
     val cardsShared: Int = 0,
     val lastGreetingName: String = "",
     val savedCreations: List<com.example.data.model.SavedGreeting> = emptyList(),
-    val babyNameShortlist: List<ShortlistedName> = emptyList()
+    val babyNameShortlist: List<ShortlistedName> = emptyList(),
+    val numerologyProfiles: List<com.example.data.model.NumerologyProfile> = emptyList(),
+    val selectedNumerologyProfileId: String? = null
 )
 
 class UserPreferencesRepository(context: Context) {
+    private val dataStore = context.applicationContext.userDataStore
+    private val repositoryScope = CoroutineScope(Dispatchers.IO)
     private val prefs: SharedPreferences =
         context.getSharedPreferences("shubhodaya_user_prefs", Context.MODE_PRIVATE)
 
@@ -84,7 +99,9 @@ class UserPreferencesRepository(context: Context) {
             cardsShared = cardsShared,
             lastGreetingName = lastGreetingName,
             savedCreations = savedCreations,
-            babyNameShortlist = loadBabyNameShortlist()
+            babyNameShortlist = loadBabyNameShortlist(),
+            numerologyProfiles = loadNumerologyProfiles(),
+            selectedNumerologyProfileId = prefs.getString("selected_numerology_profile_id", null)
         )
     }
 
@@ -213,6 +230,11 @@ class UserPreferencesRepository(context: Context) {
     fun setThemeMode(themeMode: ThemeMode) {
         prefs.edit().putString("theme_mode", themeMode.name).apply()
         _userPreferences.value = _userPreferences.value.copy(themeMode = themeMode)
+        repositoryScope.launch {
+            dataStore.edit { preferences ->
+                preferences[KEY_THEME_MODE] = themeMode.name
+            }
+        }
     }
 
     fun setHasCompletedOnboarding(completed: Boolean) {
@@ -273,4 +295,77 @@ class UserPreferencesRepository(context: Context) {
         _userPreferences.value = _userPreferences.value.copy(cardsShared = next)
         return next
     }
+
+    private fun loadNumerologyProfiles(): List<com.example.data.model.NumerologyProfile> {
+        val raw = prefs.getString("numerology_profiles_json", "[]") ?: "[]"
+        return try {
+            val array = org.json.JSONArray(raw)
+            (0 until array.length()).map { i ->
+                val obj = array.getJSONObject(i)
+                com.example.data.model.NumerologyProfile(
+                    id = obj.getString("id"),
+                    label = obj.optString("label", "Me"),
+                    fullName = obj.getString("fullName"),
+                    birthDate = java.time.LocalDate.parse(obj.getString("birthDate")),
+                    gender = obj.optString("gender", "Unspecified"),
+                    createdAt = obj.optLong("createdAt", System.currentTimeMillis())
+                )
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    private fun persistNumerologyProfiles(profiles: List<com.example.data.model.NumerologyProfile>) {
+        val array = org.json.JSONArray()
+        profiles.forEach { profile ->
+            array.put(
+                org.json.JSONObject()
+                    .put("id", profile.id)
+                    .put("label", profile.label)
+                    .put("fullName", profile.fullName)
+                    .put("birthDate", profile.birthDate.toString())
+                    .put("gender", profile.gender)
+                    .put("createdAt", profile.createdAt)
+            )
+        }
+        prefs.edit().putString("numerology_profiles_json", array.toString()).apply()
+    }
+
+    fun saveNumerologyProfile(profile: com.example.data.model.NumerologyProfile) {
+        val current = _userPreferences.value.numerologyProfiles
+        val existingIndex = current.indexOfFirst { it.id == profile.id }
+        val updated = if (existingIndex >= 0) {
+            current.toMutableList().apply { set(existingIndex, profile) }
+        } else {
+            current + profile
+        }
+        persistNumerologyProfiles(updated)
+        prefs.edit().putString("selected_numerology_profile_id", profile.id).apply()
+        _userPreferences.value = _userPreferences.value.copy(
+            numerologyProfiles = updated,
+            selectedNumerologyProfileId = profile.id
+        )
+    }
+
+    fun deleteNumerologyProfile(profileId: String) {
+        val updated = _userPreferences.value.numerologyProfiles.filterNot { it.id == profileId }
+        persistNumerologyProfiles(updated)
+        val nextSelected = if (_userPreferences.value.selectedNumerologyProfileId == profileId) {
+            updated.firstOrNull()?.id
+        } else {
+            _userPreferences.value.selectedNumerologyProfileId
+        }
+        prefs.edit().putString("selected_numerology_profile_id", nextSelected).apply()
+        _userPreferences.value = _userPreferences.value.copy(
+            numerologyProfiles = updated,
+            selectedNumerologyProfileId = nextSelected
+        )
+    }
+
+    fun selectNumerologyProfile(profileId: String) {
+        prefs.edit().putString("selected_numerology_profile_id", profileId).apply()
+        _userPreferences.value = _userPreferences.value.copy(selectedNumerologyProfileId = profileId)
+    }
 }
+

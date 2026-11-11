@@ -64,6 +64,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.theme.muhurthamColors
 import com.example.data.AstronomyEngine
 import com.example.data.PanchangNames
 import com.example.data.model.City
@@ -481,15 +482,16 @@ private fun ActiveRahuKalamBanner(
     language: Language,
     rahuKalam: String
 ) {
+    val muhurthamColors = MaterialTheme.muhurthamColors
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("rahu_kalam_active_banner"),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFEBEE)
+            containerColor = muhurthamColors.inauspiciousRedBg
         ),
-        border = BorderStroke(1.5.dp, InauspiciousRed)
+        border = BorderStroke(1.5.dp, muhurthamColors.inauspiciousRed)
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
@@ -499,7 +501,7 @@ private fun ActiveRahuKalamBanner(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .background(InauspiciousRed),
+                    .background(muhurthamColors.inauspiciousRed),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -517,13 +519,13 @@ private fun ActiveRahuKalamBanner(
                     text = if (language == Language.TELUGU) "ప్రస్తుతం రాహుకాలం నడుస్తోంది!" else "Currently Inside Rahu Kalam!",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = InauspiciousRed
+                    color = muhurthamColors.inauspiciousRed
                 )
                 Text(
                     text = if (language == Language.TELUGU) "$rahuKalam • ముఖ్యమైన కార్యాలు, ప్రయాణాలు నివారించండి"
                     else "$rahuKalam • Avoid initiating auspicious ventures",
                     fontSize = 11.sp,
-                    color = Color(0xFF5C0A0A)
+                    color = muhurthamColors.inauspiciousRed.copy(alpha = 0.9f)
                 )
             }
         }
@@ -541,9 +543,9 @@ private fun SamvatsaramHeaderCard(
             .testTag("panchang_samvatsaram_card"),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = TempleMaroonDark
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
-        border = BorderStroke(1.dp, TempleGold)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f))
     ) {
         Column(
             modifier = Modifier
@@ -553,14 +555,14 @@ private fun SamvatsaramHeaderCard(
         ) {
             Text(
                 text = if (language == Language.TELUGU) panchang.samvatsaramTe else panchang.samvatsaramEn,
-                color = TempleGoldLight,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
                 text = "${if (language == Language.TELUGU) panchang.ayanamTe else panchang.ayanamEn} • ${if (language == Language.TELUGU) panchang.rutuvuTe else panchang.rutuvuEn} • ${if (language == Language.TELUGU) "${panchang.maasamTe}, ${panchang.pakshamTe}" else "${panchang.maasamEn}, ${panchang.pakshamEn}"}",
-                color = Color.White.copy(alpha = 0.9f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium
             )

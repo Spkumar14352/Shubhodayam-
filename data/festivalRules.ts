@@ -147,12 +147,60 @@ export const festivalRules: FestivalRule[] = [
     "ritualsTe": "నువ్వుల నూనెతో తలస్నానం, సాయంత్రం మట్టి ప్రమిదలతో దీపాలంకరణ, లక్ష్మీదేవి పూజ, బాణాసంచా కాల్చడం."
   },
   {
+    "id": "karthika_masam_start", "type": "tithi", "month": "Kartika", "paksha": "shukla", "tithi": 1, "kala": "sunrise", "major": true,
+    "nameEn": "Karthika Masam begins", "nameTe": "కార్తీక మాసారంభం",
+    "descriptionEn": "The beginning of the auspicious Karthika month, dedicated to the worship of Lord Shiva and Lord Vishnu.",
+    "descriptionTe": "శివకేశవుల ఆరాధనకు అత్యంత విశిష్టమైన కార్తీక మాసారంభం. తెల్లవారుజామున నదీ స్నానాలు, నిత్య దీపారాధనలు ప్రారంభం.",
+    "ritualsEn": "Early morning bath, daily lighting of earthen lamps, Akasa Deepam.",
+    "ritualsTe": "నదీ స్నానం లేదా పుణ్యస్నానం, నిత్యం ఉదయ సాయంత్రాల్లో ఆవు నెయ్యితో దీపారాధన, ఆకాశ దీప దర్శనం."
+  },
+  {
+    "id": "bhagini_hasta_bhojanam", "type": "tithi", "month": "Kartika", "paksha": "shukla", "tithi": 2, "kala": "sunrise", "major": true,
+    "nameEn": "Bhagini Hasta Bhojanam (Bhatru Ditiya)", "nameTe": "భగినీ హస్త భోజనం (యమ ద్వితీయ / భ్రాతృ విదియ)",
+    "descriptionEn": "Brothers dine at their sisters' homes and receive blessings and gifts; prayers offered to Yama Dharmaraja.",
+    "descriptionTe": "సోదరి చేతి భోజనం చేసి సోదరులు కానుకలు సమర్పించే పవిత్ర దినం. అపమృత్యు భయ నివారణకు యమ ధర్మరాజు ఆరాధన.",
+    "ritualsEn": "Brothers visit sisters, meal prepared by sister, exchange of gifts, lighting lamps for Yama.",
+    "ritualsTe": "తోబుట్టువుల అనురాగ బంధం, సోదరి స్వయంగా వండిన వంటల భోజనం, కానుకలు ఇవ్వడం, యమ దీపదానం."
+  },
+  {
+    "id": "nagula_chavithi", "type": "tithi", "month": "Kartika", "paksha": "shukla", "tithi": 4, "kala": "sunrise", "major": true,
+    "nameEn": "Nagula Chavithi", "nameTe": "నాగుల చవితి",
+    "descriptionEn": "Devotees, especially women, worship the serpent god (Nagendra) at ant-hills with milk, chalimidi, and thil laddus.",
+    "descriptionTe": "సంతాన సౌభాగ్యం, వంశాభివృద్ధి కొరకు మహిళలు పుట్టలో పాలు, చలిమిడి, చిమ్మిలి సమర్పించి నాగేంద్రుని ఆరాధించే పుణ్యదినం.",
+    "ritualsEn": "Offering cow milk, thil-jaggery (Chimmidi), chalimidi at ant-hills, lighting oil lamps.",
+    "ritualsTe": "నాగుల పుట్ట వద్ద పసుపు, కుంకుమలతో పూజ, ఆవు పాలు, చలిమిడి, చిమ్మిలి నైవేద్యం, నాగస్తుతి పారాయణం."
+  },
+  {
+    "id": "utthana_ekadashi", "type": "tithi", "month": "Kartika", "paksha": "shukla", "tithi": 11, "kala": "sunrise", "major": true,
+    "nameEn": "Utthana (Prabodhini) Ekadashi", "nameTe": "ఉత్థాన ఏకాదశి (ప్రబోధినీ ఏకాదశి)",
+    "descriptionEn": "Lord Vishnu awakens from his four-month cosmic yogic sleep (Chaturmasya). A sacred day of complete fasting.",
+    "descriptionTe": "శ్రీమహావిష్ణువు చాతుర్మాస్య యోగనిద్ర నుండి మేల్కొనే పరమ పవిత్ర ఏకాదశి. భక్తులు రోజంతా ఉపవాసం ఉండి హరినామ సంకీర్తన చేస్తారు.",
+    "ritualsEn": "Complete fasting (Upavasam), Vishnu Sahasranama parayana, night vigil (Jagaram).",
+    "ritualsTe": "నిరాహార ఉపవాసం, రాత్రి జాగరణ, విష్ణు సహస్రనామ పారాయణం, హరి కథా శ్రవణం."
+  },
+  {
+    "id": "ksheerabdi_dwadashi", "type": "tithi", "month": "Kartika", "paksha": "shukla", "tithi": 12, "kala": "sunrise", "major": true,
+    "nameEn": "Ksheerabdi Dwadashi (Chiluka Dwadashi)", "nameTe": "క్షీరాబ్ది ద్వాదశి (చిలుక ద్వాదశి)",
+    "descriptionEn": "Celebration of Tulasi-Damodara celestial wedding with gooseberry (amla) branch and sugarcane puja at dusk.",
+    "descriptionTe": "తులసి కోటలో ఉసిరి కొమ్మను ఉంచి, చెరుకుగడలతో మండపం నిర్మించి తులసీ-ధాత్రీ సమేత దామోదర కల్యాణం జరిపించే విశేష పర్వదినం.",
+    "ritualsEn": "Tulasi Damodara Kalyanam, lighting amla deepams, offering Poha and sweets.",
+    "ritualsTe": "తులసి దామోదర కల్యాణం, ఉసిరి కాయలపై నేతి దీపాలు వెలిగించడం, చెరుకు ముక్కలు, అటుకులు నైవేద్యం."
+  },
+  {
     "id": "karthika_pournami", "type": "tithi", "month": "Kartika", "paksha": "shukla", "tithi": 15, "kala": "sunrise", "major": true,
     "nameEn": "Karthika Pournami", "nameTe": "కార్తీక పౌర్ణమి",
     "descriptionEn": "The pinnacle of the auspicious Karthika month. Devotees light 365 wicks, perform Jwala Toranam, and float lit diyas on water bodies.",
     "descriptionTe": "శివకేశవులకు అత్యంత ప్రీతిపాత్రమైన కార్తీక మాసపు మహోన్నత దినం. 365 వత్తులతో దీపారాధన, జ్వాలాతోరణ దర్శనం మరియు ఉసిరి చెట్టు కింద దీపాలు.",
     "ritualsEn": "365 wick lighting with cow ghee, Jwala Toranam crossing, floating diyas on rivers, Usiri deepam.",
     "ritualsTe": "గోవు నెయ్యితో 365 వత్తుల దీపం, గుడుల్లో జ్వాలాతోరణం కింద నడవడం, నదీ జలాల్లో దీపాలు వదలడం."
+  },
+  {
+    "id": "karthika_amavasya", "type": "tithi", "month": "Kartika", "paksha": "krishna", "tithi": 15, "kala": "sunrise", "major": true,
+    "nameEn": "Karthika Amavasya (Poli Swargam)", "nameTe": "కార్తీక అమావాస్య (కార్తీక మాస సమాప్తి / పోలి స్వర్గం)",
+    "descriptionEn": "The concluding day of Karthika month. Women observe Poli Swargam vratham by floating 30-wick diyas on water bodies at dawn.",
+    "descriptionTe": "కార్తీక మాసపు ముగింపు దినం. తెల్లవారుజామునే అరటి దొప్పలలో 30 వత్తుల దీపాలను వెలిగించి నదులు, చెరువుల్లో వదిలే పోలిపాడ్యమి/పోలి స్వర్గం నోము.",
+    "ritualsEn": "Floating Poli deepams in water bodies at dawn, conclusion of Karthika Snana-Deepam vratham.",
+    "ritualsTe": "తెల్లవారుజామున నదీ స్నానం, అరటి దొప్పలలో దీపాలు వెలిగించి వదలడం, బ్రాహ్మణ సమారాధన, కార్తీక మాస వ్రత సమాప్తి."
   },
   {
     "id": "vaikunta_ekadashi", "type": "tithiWithSunSign", "paksha": "shukla", "tithi": 11, "sunSign": "Dhanu", "kala": "sunrise", "major": true,

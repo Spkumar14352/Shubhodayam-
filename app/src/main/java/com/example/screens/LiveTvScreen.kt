@@ -656,19 +656,30 @@ private fun availabilityOf(channel: Channel, status: LiveStatusState): ChannelAv
 
 @Composable
 private fun AvailabilityTag(availability: ChannelAvailability, language: Language) {
-    val (label, color) = when (availability) {
-        ChannelAvailability.LIVE -> "LIVE" to LiveRed
-        ChannelAvailability.OFFLINE -> Translations.tr("live_offline", language) to Color(0xFF757575)
+    val (label, color, dotColor) = when (availability) {
+        ChannelAvailability.LIVE -> Triple("LIVE", LiveRed, Color(0xFF4CAF50))
+        ChannelAvailability.OFFLINE -> Triple(Translations.tr("live_offline", language), Color(0xFF757575), Color(0xFF9E9E9E))
         ChannelAvailability.UNKNOWN -> return
     }
     Surface(shape = RoundedCornerShape(4.dp), color = color) {
-        Text(
-            text = label,
-            color = Color.White,
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .clip(CircleShape)
+                    .background(dotColor)
+            )
+            Spacer(modifier = Modifier.width(3.dp))
+            Text(
+                text = label,
+                color = Color.White,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 

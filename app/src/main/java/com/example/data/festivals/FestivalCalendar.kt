@@ -28,4 +28,14 @@ object FestivalCalendar {
 
     fun nextMajor(context: Context, from: LocalDate, lat: Double, lon: Double): FestivalCalendarItem? =
         upcoming(context, from, lat, lon).firstOrNull { it.isMajor }
+
+    /** Rolling 14 months of festivals starting from the 1st of [fromDate]'s month. */
+    fun forRolling14Months(context: Context, fromDate: LocalDate, lat: Double, lon: Double): List<FestivalCalendarItem> {
+        val startMonth = fromDate.withDayOfMonth(1)
+        val endLimit = startMonth.plusMonths(14)
+        val years = (startMonth.year..endLimit.year).toList()
+        return years.flatMap { forYear(context, it, lat, lon) }
+            .filter { !it.date.isBefore(startMonth) && it.date.isBefore(endLimit) }
+            .sortedWith(compareBy<FestivalCalendarItem> { it.date }.thenBy { !it.isMajor })
+    }
 }

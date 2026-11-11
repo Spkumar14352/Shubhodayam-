@@ -31,6 +31,7 @@ enum class MoreDestination {
     GRAHANAM,
     MUHURTHAMS,
     SHUBHALEKHA,
+    NUMEROLOGY,
     SETTINGS,
     PREMIUM
 }

@@ -14,4 +14,8 @@ export interface FestivalOverride {
 }
 
 export const festivalOverrides: FestivalOverride[] = [
+  { id: "karthika_masam_start", year: 2026, date: "2026-11-10", source: "ధృవీకరించబడిన పంచాంగం" },
+  { id: "karthika_pournami", year: 2026, date: "2026-11-24", source: "ధృవీకరించబడిన పంచాంగం" },
+  { id: "karthika_amavasya", year: 2026, date: "2026-12-08", source: "ధృవీకరించబడిన పంచాంగం" },
+  { id: "deepavali", year: 2026, date: "2026-11-08", source: "ధృవీకరించబడిన పంచాంగం" }
 ];
