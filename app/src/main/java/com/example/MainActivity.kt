@@ -129,7 +129,11 @@ class MainActivity : ComponentActivity() {
                                             playerState = uiState.radioPlayerState,
                                             onTogglePlay = { viewModel.toggleRadioPlay() },
                                             onStop = { viewModel.stopRadio() },
-                                            onClearError = { viewModel.clearRadioError() }
+                                            onClearError = { viewModel.clearRadioError() },
+                                            onOpenRadioScreen = {
+                                                viewModel.selectTab(com.example.data.model.TabItem.MORE)
+                                                viewModel.navigateToMoreDestination(com.example.data.model.MoreDestination.RADIO)
+                                            }
                                         )
                                         BottomNavBar(
                                             selectedTab = uiState.currentTab,
@@ -254,6 +258,7 @@ class MainActivity : ComponentActivity() {
                                             onSelectRadioCategory = { viewModel.selectRadioCategory(it) },
                                             onSelectRadioStation = { viewModel.playRadioStation(it) },
                                             onToggleRadioPlay = { viewModel.toggleRadioPlay() },
+                                            onStopRadio = { viewModel.stopRadio() },
                                             onSendPanditMessage = { viewModel.askAiPandit(it) },
                                             savedGreetingName = uiState.userPreferences.lastGreetingName,
                                             savedCreations = uiState.userPreferences.savedCreations,

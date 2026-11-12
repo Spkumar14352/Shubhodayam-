@@ -60,7 +60,7 @@ data class MainUiState(
     /** Null until the first calculation finishes. */
     val eclipses: List<com.example.data.eclipses.Eclipse>? = null,
     val radioPlayerState: RadioPlayerState = RadioPlayerState(),
-    val selectedRadioCategory: String = "TELUGU", // "TELUGU", "DEVOTIONAL", "NATIONAL"
+    val selectedRadioCategory: String = "POPULAR",
     val radioStations: List<RadioBrowserStation> = emptyList(),
     val isRadioLoadingStations: Boolean = false,
     val selectedNewsCategory: String = "Telugu", // "Telugu", "India", "Sports", "Devotional", "BOOKMARKS"
@@ -118,7 +118,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         // Load initial radio stations
-        loadRadioStations("TELUGU")
+        loadRadioStations("POPULAR")
 
         // Load initial news and cricket matches
         loadNews("Telugu", forceRefresh = false)

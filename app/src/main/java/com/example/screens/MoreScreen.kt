@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -108,6 +110,7 @@ fun MoreScreen(
     onSelectRadioCategory: (String) -> Unit,
     onSelectRadioStation: (com.example.data.model.RadioBrowserStation) -> Unit,
     onToggleRadioPlay: () -> Unit,
+    onStopRadio: () -> Unit = {},
     onSendPanditMessage: (String) -> Unit,
     savedGreetingName: String = "",
     savedCreations: List<com.example.data.model.SavedGreeting> = emptyList(),
@@ -129,7 +132,7 @@ fun MoreScreen(
 ) {
     // If a sub-destination is selected, show that screen
     when (currentDestination) {
-        MoreDestination.RADIO -> RadioSubScreen(
+        MoreDestination.RADIO -> RadioScreen(
             language = language,
             selectedCategory = selectedRadioCategory,
             stations = radioStations,
@@ -138,6 +141,7 @@ fun MoreScreen(
             onSelectCategory = onSelectRadioCategory,
             onSelectStation = onSelectRadioStation,
             onTogglePlay = onToggleRadioPlay,
+            onStop = onStopRadio,
             onBack = onBack
         )
         MoreDestination.CRICKET -> CricketSubScreen(
@@ -421,19 +425,51 @@ fun MoreScreen(
                                     .padding(14.dp),
                                 verticalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(42.dp)
-                                        .clip(CircleShape)
-                                        .background(item.color.copy(alpha = 0.15f)),
-                                    contentAlignment = Alignment.Center
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.Top
                                 ) {
-                                    Icon(
-                                        imageVector = item.icon,
-                                        contentDescription = null,
-                                        tint = item.color,
-                                        modifier = Modifier.size(22.dp)
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(42.dp)
+                                            .clip(CircleShape)
+                                            .background(item.color.copy(alpha = 0.15f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = item.icon,
+                                            contentDescription = null,
+                                            tint = item.color,
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                    }
+
+                                    if (item.destination == MoreDestination.RADIO) {
+                                        Surface(
+                                            shape = RoundedCornerShape(4.dp),
+                                            color = Color(0xFF1B5E20).copy(alpha = 0.15f)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(6.dp)
+                                                        .clip(CircleShape)
+                                                        .background(Color(0xFF4CAF50))
+                                                )
+                                                Spacer(modifier = Modifier.width(3.dp))
+                                                Text(
+                                                    text = "LIVE",
+                                                    fontSize = 8.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color(0xFF2E7D32)
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
 
                                 Column {
