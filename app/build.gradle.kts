@@ -22,7 +22,7 @@ android {
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.shubhodaya.daily"
+    applicationId = "com.spk.shubhodaya"
     minSdk = 24
     targetSdk = 36
     versionCode = 1
