@@ -8,7 +8,10 @@ data class RadioBrowserStation(
     val favicon: String = "",
     val tags: String = "",
     val language: String = "",
-    val bitrate: Int = 128
+    val bitrate: Int = 128,
+    val teluguName: String = "",
+    val category: String = "POPULAR", // POPULAR, DEVOTIONAL, MELODIES, NEWS, NATIONAL
+    val frequencyOrCity: String = ""
 ) {
     fun getStreamUrl(): String {
         return if (urlResolved.isNotBlank()) urlResolved else url
@@ -26,112 +29,168 @@ data class RadioBrowserStation(
 }
 
 object FallbackRadioStations {
-    val teluguStations = listOf(
+    val popularTeluguStations = listOf(
         RadioBrowserStation(
-            stationuuid = "telugu_1",
-            name = "Telugu Devotional Chants (Tirumala)",
-            url = "https://stream.zeno.fm/f9c8f0z9wqruv",
-            urlResolved = "https://stream.zeno.fm/f9c8f0z9wqruv",
+            stationuuid = "telugu_akashvani_hyd",
+            name = "Akashvani Hyderabad (AIR Telugu)",
+            teluguName = "ఆకాశవాణి హైదరాబాద్ తెలుగు",
+            url = "https://radio.wavespb.com/live/1c701f7b70df2568/1c701f7b70df2568.m3u8",
+            urlResolved = "https://radio.wavespb.com/live/1c701f7b70df2568/1c701f7b70df2568.m3u8",
             favicon = "",
-            tags = "devotional, chants, telugu",
+            tags = "air, akashvani, telugu, hyderabad, news",
             language = "telugu",
-            bitrate = 128
+            bitrate = 128,
+            category = "NEWS",
+            frequencyOrCity = "Hyderabad AIR"
         ),
         RadioBrowserStation(
-            stationuuid = "telugu_2",
-            name = "Telugu Golden Hits FM",
-            url = "https://stream.zeno.fm/004hwd4b808uv",
-            urlResolved = "https://stream.zeno.fm/004hwd4b808uv",
+            stationuuid = "telugu_vb_hyd",
+            name = "Vividh Bharati Telugu Hyderabad",
+            teluguName = "వివిధ భారతి తెలుగు హైదరాబాద్",
+            url = "https://radio.wavespb.com/live/89969ad91f106dde/89969ad91f106dde.m3u8",
+            urlResolved = "https://radio.wavespb.com/live/89969ad91f106dde/89969ad91f106dde.m3u8",
             favicon = "",
-            tags = "telugu, hits, classics",
+            tags = "vividh bharati, film hits, retro, entertainment",
             language = "telugu",
-            bitrate = 128
+            bitrate = 128,
+            category = "POPULAR",
+            frequencyOrCity = "102.8 FM Hyderabad"
         ),
         RadioBrowserStation(
-            stationuuid = "telugu_3",
-            name = "Radio City Telugu",
-            url = "https://stream.zeno.fm/w3k277u2w8quv",
-            urlResolved = "https://stream.zeno.fm/w3k277u2w8quv",
+            stationuuid = "telugu_fm_rainbow_hyd",
+            name = "FM Rainbow Hyderabad",
+            teluguName = "ఎఫ్.ఎం రెయిన్‌బో హైదరాబాద్",
+            url = "https://radio.wavespb.com/live/3a02c5c035815bb9/3a02c5c035815bb9.m3u8",
+            urlResolved = "https://radio.wavespb.com/live/3a02c5c035815bb9/3a02c5c035815bb9.m3u8",
             favicon = "",
-            tags = "telugu, pop, news",
+            tags = "rainbow, hits, chartbusters, pop, youth",
             language = "telugu",
-            bitrate = 128
+            bitrate = 128,
+            category = "POPULAR",
+            frequencyOrCity = "101.9 FM Hyderabad"
         ),
         RadioBrowserStation(
-            stationuuid = "telugu_4",
-            name = "Annamayya Sankeerthanas",
-            url = "https://stream.zeno.fm/9k2c7h72x8quv",
-            urlResolved = "https://stream.zeno.fm/9k2c7h72x8quv",
+            stationuuid = "telugu_svbc_ttd",
+            name = "SVBC TTD Radio (Tirumala Devotional)",
+            teluguName = "తిరుమల శ్రీ వేంకటేశ్వర భక్తి ప్రసారాలు",
+            url = "https://radio.mslivecdn.com:6278/stream",
+            urlResolved = "https://radio.mslivecdn.com:6278/stream",
             favicon = "",
-            tags = "devotional, annamayya, spiritual",
+            tags = "devotional, suprabhatam, tirupati, ttd, sankeerthana",
             language = "telugu",
-            bitrate = 128
+            bitrate = 128,
+            category = "DEVOTIONAL",
+            frequencyOrCity = "Tirumala Tirupati"
+        ),
+        RadioBrowserStation(
+            stationuuid = "telugu_shaiva_lahari",
+            name = "Shaiva Lahari Bhakthi Ganam",
+            teluguName = "శైవ లహరి భక్తి గానం & స్తోత్రాలు",
+            url = "https://radio.shaivam.org/listen/shaiva-lahari/radio.mp3",
+            urlResolved = "https://radio.shaivam.org/listen/shaiva-lahari/radio.mp3",
+            favicon = "",
+            tags = "devotional, shiva, chants, stotras, vedic",
+            language = "telugu",
+            bitrate = 128,
+            category = "DEVOTIONAL",
+            frequencyOrCity = "Devotional Chants"
+        ),
+        RadioBrowserStation(
+            stationuuid = "telugu_vb_vijayawada",
+            name = "Vividh Bharati Telugu Vijayawada",
+            teluguName = "వివిధ భారతి విజయవాడ తెలుగు",
+            url = "https://radio.wavespb.com/live/0beac8e921bbfdbb/0beac8e921bbfdbb.m3u8",
+            urlResolved = "https://radio.wavespb.com/live/0beac8e921bbfdbb/0beac8e921bbfdbb.m3u8",
+            favicon = "",
+            tags = "vividh bharati, vijayawada, melodies, film songs",
+            language = "telugu",
+            bitrate = 128,
+            category = "MELODIES",
+            frequencyOrCity = "103.5 FM Vijayawada"
+        ),
+        RadioBrowserStation(
+            stationuuid = "telugu_fm_rainbow_vja",
+            name = "FM Rainbow Vijayawada",
+            teluguName = "ఎఫ్.ఎం రెయిన్‌బో విజయవాడ",
+            url = "https://radio.wavespb.com/live/bad174fd7eac38d0/bad174fd7eac38d0.m3u8",
+            urlResolved = "https://radio.wavespb.com/live/bad174fd7eac38d0/bad174fd7eac38d0.m3u8",
+            favicon = "",
+            tags = "rainbow, vijayawada, hits, songs",
+            language = "telugu",
+            bitrate = 128,
+            category = "POPULAR",
+            frequencyOrCity = "102.2 FM Vijayawada"
+        ),
+        RadioBrowserStation(
+            stationuuid = "telugu_akashvani_tirupati",
+            name = "Akashvani Tirupati",
+            teluguName = "ఆకాశవాణి తిరుపతి",
+            url = "https://radio.wavespb.com/live/1119aa26b4e9f653/1119aa26b4e9f653.m3u8",
+            urlResolved = "https://radio.wavespb.com/live/1119aa26b4e9f653/1119aa26b4e9f653.m3u8",
+            favicon = "",
+            tags = "air, tirupati, devotional, cultural",
+            language = "telugu",
+            bitrate = 128,
+            category = "DEVOTIONAL",
+            frequencyOrCity = "Tirupati AIR"
+        ),
+        RadioBrowserStation(
+            stationuuid = "telugu_akashvani_vizag",
+            name = "Akashvani Visakhapatnam",
+            teluguName = "ఆకాశవాణి విశాఖపట్నం",
+            url = "https://radio.wavespb.com/live/8362d532bd498fd0/8362d532bd498fd0.m3u8",
+            urlResolved = "https://radio.wavespb.com/live/8362d532bd498fd0/8362d532bd498fd0.m3u8",
+            favicon = "",
+            tags = "air, vizag, andhra coast, news, culture",
+            language = "telugu",
+            bitrate = 128,
+            category = "NEWS",
+            frequencyOrCity = "Visakhapatnam AIR"
+        ),
+        RadioBrowserStation(
+            stationuuid = "telugu_oye_radio",
+            name = "Oye Radio Telugu Hits",
+            teluguName = "ఓయే రేడియో తెలుగు సూపర్ హిట్స్",
+            url = "https://stream.oye.radio/listen/oye_radio/radio.mp3",
+            urlResolved = "https://stream.oye.radio/listen/oye_radio/radio.mp3",
+            favicon = "",
+            tags = "oye, hits, modern, pop, cinema",
+            language = "telugu",
+            bitrate = 128,
+            category = "POPULAR",
+            frequencyOrCity = "Online Telugu Hits"
+        ),
+        RadioBrowserStation(
+            stationuuid = "telugu_air_national_032",
+            name = "AIR Telugu National Network",
+            teluguName = "ఆకాశవాణి తెలుగు జాతీయ ప్రసారాలు",
+            url = "https://air.pc.cdn.bitgravity.com/air/live/pbaudio032/playlist.m3u8",
+            urlResolved = "https://air.pc.cdn.bitgravity.com/air/live/pbaudio032/playlist.m3u8",
+            favicon = "",
+            tags = "air, national, telugu news, varthalu",
+            language = "telugu",
+            bitrate = 128,
+            category = "NEWS",
+            frequencyOrCity = "All India Radio"
         )
     )
 
-    val devotionalStations = listOf(
+    // Backwards compatibility mappings for older callers
+    val teluguStations: List<RadioBrowserStation> get() = popularTeluguStations
+    val devotionalStations: List<RadioBrowserStation> get() = popularTeluguStations.filter { it.category == "DEVOTIONAL" }
+    val nationalStations: List<RadioBrowserStation> get() = listOf(
         RadioBrowserStation(
-            stationuuid = "devo_1",
-            name = "Sri Venkateswara Bhakthi Ganam",
-            url = "https://stream.zeno.fm/f9c8f0z9wqruv",
-            urlResolved = "https://stream.zeno.fm/f9c8f0z9wqruv",
-            favicon = "",
-            tags = "devotional, tirupati, vedic",
-            language = "telugu",
-            bitrate = 128
-        ),
-        RadioBrowserStation(
-            stationuuid = "devo_2",
-            name = "Shiva Chants & Maha Rudram",
-            url = "https://stream.zeno.fm/s4k89qu9wqruv",
-            urlResolved = "https://stream.zeno.fm/s4k89qu9wqruv",
-            favicon = "",
-            tags = "devotional, shiva, chants",
-            language = "sanskrit",
-            bitrate = 128
-        ),
-        RadioBrowserStation(
-            stationuuid = "devo_3",
-            name = "Divya Bhakthi Sagar",
-            url = "https://stream.zeno.fm/d4k29qu9wqruv",
-            urlResolved = "https://stream.zeno.fm/d4k29qu9wqruv",
-            favicon = "",
-            tags = "devotional, bhajans, kirtan",
-            language = "hindi",
-            bitrate = 128
-        )
-    )
-
-    val nationalStations = listOf(
-        RadioBrowserStation(
-            stationuuid = "nat_1",
+            stationuuid = "nat_vividh_bharati",
             name = "AIR Vividh Bharati National",
+            teluguName = "వివిధ భారతి నేషనల్",
             url = "https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/playlist.m3u8",
             urlResolved = "https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/playlist.m3u8",
             favicon = "",
-            tags = "national, all india radio, hindi",
+            tags = "national, air, hindi, classic",
             language = "hindi",
-            bitrate = 128
-        ),
-        RadioBrowserStation(
-            stationuuid = "nat_2",
-            name = "Radio Mirchi India Hits",
-            url = "https://stream.zeno.fm/9712z3u2w8quv",
-            urlResolved = "https://stream.zeno.fm/9712z3u2w8quv",
-            favicon = "",
-            tags = "national, hits, bollywood",
-            language = "hindi",
-            bitrate = 128
-        ),
-        RadioBrowserStation(
-            stationuuid = "nat_3",
-            name = "AIR News 24x7 India",
-            url = "https://air.pc.cdn.bitgravity.com/air/live/pbaudio002/playlist.m3u8",
-            urlResolved = "https://air.pc.cdn.bitgravity.com/air/live/pbaudio002/playlist.m3u8",
-            favicon = "",
-            tags = "news, national, air",
-            language = "english",
-            bitrate = 128
+            bitrate = 128,
+            category = "NATIONAL",
+            frequencyOrCity = "All India Radio"
         )
     )
 }

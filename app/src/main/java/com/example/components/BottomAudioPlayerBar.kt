@@ -1,18 +1,25 @@
 package com.example.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,9 +39,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -52,6 +61,7 @@ fun BottomAudioPlayerBar(
     onTogglePlay: () -> Unit,
     onStop: () -> Unit,
     onClearError: () -> Unit,
+    onOpenRadioScreen: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val station = playerState.currentStation
@@ -106,23 +116,26 @@ fun BottomAudioPlayerBar(
 
                         IconButton(
                             onClick = onClearError,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(32.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Dismiss Error",
                                 tint = MaterialTheme.muhurthamColors.inauspiciousRed,
-                                modifier = Modifier.size(14.dp)
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
                 }
             }
 
-            // Fixed Single HTML5-style Audio Player Bar
+            // Fixed Single Audio Player Bar
             if (station != null) {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .clickable { onOpenRadioScreen() },
                     shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
@@ -142,14 +155,14 @@ fun BottomAudioPlayerBar(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
+                                    .size(38.dp)
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.primary),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = station.getInitials(),
-                                    fontSize = 11.sp,
+                                    fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onPrimary
                                 )
@@ -169,21 +182,27 @@ fun BottomAudioPlayerBar(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Surface(
                                         shape = RoundedCornerShape(4.dp),
-                                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                                        color = if (playerState.isPlaying) Color(0xFF1B5E20).copy(alpha = 0.15f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
                                     ) {
                                         Text(
-                                            text = "LIVE RADIO",
-                                            color = MaterialTheme.colorScheme.secondary,
+                                            text = if (playerState.isPlaying) "LIVE RADIO" else "RADIO",
+                                            color = if (playerState.isPlaying) Color(0xFF2E7D32) else MaterialTheme.colorScheme.secondary,
                                             fontSize = 9.sp,
                                             fontWeight = FontWeight.Bold,
                                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                                         )
                                     }
                                     Spacer(modifier = Modifier.width(6.dp))
+                                    if (playerState.isPlaying) {
+                                        MiniEqualizerBars()
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                    }
                                     Text(
-                                        text = "${station.bitrate} kbps",
+                                        text = if (station.teluguName.isNotBlank()) station.teluguName else "${station.bitrate} kbps",
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 10.sp
+                                        fontSize = 10.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
@@ -193,20 +212,20 @@ fun BottomAudioPlayerBar(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (playerState.isLoading) {
                                 Box(
-                                    modifier = Modifier.size(36.dp),
+                                    modifier = Modifier.size(44.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     CircularProgressIndicator(
                                         color = MaterialTheme.colorScheme.primary,
                                         strokeWidth = 2.dp,
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(22.dp)
                                     )
                                 }
                             } else {
                                 IconButton(
                                     onClick = onTogglePlay,
                                     modifier = Modifier
-                                        .size(36.dp)
+                                        .size(44.dp)
                                         .clip(CircleShape)
                                         .background(MaterialTheme.colorScheme.primary)
                                         .testTag("fixed_player_play_pause_btn")
@@ -215,25 +234,25 @@ fun BottomAudioPlayerBar(
                                         imageVector = if (playerState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                                         contentDescription = "Play/Pause",
                                         tint = MaterialTheme.colorScheme.onPrimary,
-                                        modifier = Modifier.size(22.dp)
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
                             }
 
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
 
                             // Stop button
                             IconButton(
                                 onClick = onStop,
                                 modifier = Modifier
-                                    .size(32.dp)
+                                    .size(38.dp)
                                     .testTag("fixed_player_stop_btn")
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Stop Radio",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -241,5 +260,39 @@ fun BottomAudioPlayerBar(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun MiniEqualizerBars() {
+    val infiniteTransition = rememberInfiniteTransition(label = "mini_eq")
+
+    val h1 by infiniteTransition.animateFloat(
+        initialValue = 3f,
+        targetValue = 10f,
+        animationSpec = infiniteRepeatable(animation = tween(350), repeatMode = RepeatMode.Reverse),
+        label = "h1"
+    )
+    val h2 by infiniteTransition.animateFloat(
+        initialValue = 8f,
+        targetValue = 3f,
+        animationSpec = infiniteRepeatable(animation = tween(280), repeatMode = RepeatMode.Reverse),
+        label = "h2"
+    )
+    val h3 by infiniteTransition.animateFloat(
+        initialValue = 4f,
+        targetValue = 11f,
+        animationSpec = infiniteRepeatable(animation = tween(420), repeatMode = RepeatMode.Reverse),
+        label = "h3"
+    )
+
+    Row(
+        modifier = Modifier.height(12.dp),
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(1.5.dp)
+    ) {
+        Box(modifier = Modifier.width(2.dp).height(h1.dp).background(Color(0xFF2E7D32), RoundedCornerShape(1.dp)))
+        Box(modifier = Modifier.width(2.dp).height(h2.dp).background(Color(0xFF4CAF50), RoundedCornerShape(1.dp)))
+        Box(modifier = Modifier.width(2.dp).height(h3.dp).background(Color(0xFF2E7D32), RoundedCornerShape(1.dp)))
     }
 }
